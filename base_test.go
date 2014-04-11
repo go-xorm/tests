@@ -2180,6 +2180,12 @@ func testVersion(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
+	if newVer.Ver != 2 {
+		err = errors.New("update error")
+		t.Error(err)
+		panic(err)
+	}
+
 	newVer = new(VersionS)
 	has, err = engine.Id(ver.Id).Get(newVer)
 	if err != nil {
