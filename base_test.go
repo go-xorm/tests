@@ -45,6 +45,19 @@ type Userdetail struct {
 	Profile string `xorm:"varchar(2000)"`
 }
 
+type Picture struct {
+	Id          int64
+	Url         string `xorm:"unique"` //image's url
+	Title       string
+	Description string
+	Created     time.Time `xorm:"created"`
+	ILike       int
+	PageView    int
+	From_url    string
+	Pre_url     string `xorm:"unique"` //pre view image's url
+	Uid         int64
+}
+
 func directCreateTable(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(&Userinfo{}, &Userdetail{})
 	if err != nil {
@@ -52,7 +65,7 @@ func directCreateTable(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	err = engine.Sync(&Userinfo{}, &Userdetail{})
+	err = engine.Sync(&Userinfo{}, &Userdetail{}, new(Picture))
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -2178,6 +2191,10 @@ func testVersion(engine *xorm.Engine, t *testing.T) {
 	if err != nil {
 		t.Error(err)
 		panic(err)
+	}
+	if newVer.Ver != 2 {
+		err = errors.New("update should set version back to struct")
+		t.Error(err)
 	}
 
 	newVer = new(VersionS)
