@@ -504,7 +504,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 
-		cnt, err := engine.Id(1).Inc("cnt", 1).Update(col1)
+		cnt, err := engine.Id(1).Incr("cnt").Update(col1)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -745,7 +745,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 
-		cnt, err := engine.Id(1).Inc("`Cnt`", 1).Update(col1)
+		cnt, err := engine.Id(1).Incr("`Cnt`").Update(col1)
 		if err != nil {
 			t.Error(err)
 			panic(err)
