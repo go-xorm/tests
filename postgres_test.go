@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
-	"github.com/go-xorm/xorm/caches"
 	_ "github.com/lib/pq"
 )
 
@@ -49,10 +48,10 @@ func TestPostgres(t *testing.T) {
 	engine.ShowWarn = showTestSql
 	engine.ShowDebug = showTestSql
 
-	testAll(engine, t)
-	testAllSnakeMapper(engine, t)
-	testAll2(engine, t)
-	testAll3(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAllSnakeMapper(engine, t)
+	BaseTestAll2(engine, t)
+	BaseTestAll3(engine, t)
 }
 
 func TestPostgresWithCache(t *testing.T) {
@@ -61,16 +60,16 @@ func TestPostgresWithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 	defer engine.Close()
 	engine.ShowSQL = showTestSql
 	engine.ShowErr = showTestSql
 	engine.ShowWarn = showTestSql
 	engine.ShowDebug = showTestSql
 
-	testAll(engine, t)
-	testAllSnakeMapper(engine, t)
-	testAll2(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAllSnakeMapper(engine, t)
+	BaseTestAll2(engine, t)
 }
 
 func TestPostgresSameMapper(t *testing.T) {
@@ -86,10 +85,10 @@ func TestPostgresSameMapper(t *testing.T) {
 	engine.ShowWarn = showTestSql
 	engine.ShowDebug = showTestSql
 
-	testAll(engine, t)
-	testAllSameMapper(engine, t)
-	testAll2(engine, t)
-	testAll3(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAllSameMapper(engine, t)
+	BaseTestAll2(engine, t)
+	BaseTestAll3(engine, t)
 }
 
 func TestPostgresWithCacheSameMapper(t *testing.T) {
@@ -98,7 +97,7 @@ func TestPostgresWithCacheSameMapper(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 	defer engine.Close()
 	engine.SetMapper(core.SameMapper{})
 	engine.ShowSQL = showTestSql
@@ -106,9 +105,9 @@ func TestPostgresWithCacheSameMapper(t *testing.T) {
 	engine.ShowWarn = showTestSql
 	engine.ShowDebug = showTestSql
 
-	testAll(engine, t)
-	testAllSameMapper(engine, t)
-	testAll2(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAllSameMapper(engine, t)
+	BaseTestAll2(engine, t)
 }
 
 const (
@@ -117,13 +116,13 @@ const (
 )
 
 func BenchmarkPostgresDriverInsert(t *testing.B) {
-	doBenchDriver(newPostgresDriverDB, createTablePostgres, dropTablePostgres,
-		doBenchDriverInsert, t)
+	DoBenchDriver(newPostgresDriverDB, createTablePostgres, dropTablePostgres,
+		DoBenchDriverInsert, t)
 }
 
 func BenchmarkPostgresDriverFind(t *testing.B) {
-	doBenchDriver(newPostgresDriverDB, createTablePostgres, dropTablePostgres,
-		doBenchDriverFind, t)
+	DoBenchDriver(newPostgresDriverDB, createTablePostgres, dropTablePostgres,
+		DoBenchDriverFind, t)
 }
 
 func BenchmarkPostgresNoCacheInsert(t *testing.B) {
@@ -135,7 +134,7 @@ func BenchmarkPostgresNoCacheInsert(t *testing.B) {
 		return
 	}
 	//engine.ShowSQL = true
-	doBenchInsert(engine, t)
+	DoBenchInsert(engine, t)
 }
 
 func BenchmarkPostgresNoCacheFind(t *testing.B) {
@@ -147,7 +146,7 @@ func BenchmarkPostgresNoCacheFind(t *testing.B) {
 		return
 	}
 	//engine.ShowSQL = true
-	doBenchFind(engine, t)
+	DoBenchFind(engine, t)
 }
 
 func BenchmarkPostgresNoCacheFindPtr(t *testing.B) {
@@ -159,7 +158,7 @@ func BenchmarkPostgresNoCacheFindPtr(t *testing.B) {
 		return
 	}
 	//engine.ShowSQL = true
-	doBenchFindPtr(engine, t)
+	DoBenchFindPtr(engine, t)
 }
 
 func BenchmarkPostgresCacheInsert(t *testing.B) {
@@ -170,9 +169,9 @@ func BenchmarkPostgresCacheInsert(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 
-	doBenchInsert(engine, t)
+	DoBenchInsert(engine, t)
 }
 
 func BenchmarkPostgresCacheFind(t *testing.B) {
@@ -183,9 +182,9 @@ func BenchmarkPostgresCacheFind(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 
-	doBenchFind(engine, t)
+	DoBenchFind(engine, t)
 }
 
 func BenchmarkPostgresCacheFindPtr(t *testing.B) {
@@ -196,7 +195,7 @@ func BenchmarkPostgresCacheFindPtr(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 
-	doBenchFindPtr(engine, t)
+	DoBenchFindPtr(engine, t)
 }

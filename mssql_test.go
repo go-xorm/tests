@@ -6,9 +6,10 @@ package tests
 import (
 	"database/sql"
 	"testing"
+	"time"
 
+	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
-	"github.com/go-xorm/xorm/caches"
 	_ "github.com/lunny/godbc"
 )
 
@@ -30,8 +31,8 @@ func TestMssql(t *testing.T) {
 	engine.ShowWarn = showTestSql
 	engine.ShowDebug = showTestSql
 
-	testAll(engine, t)
-	testAll2(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAll2(engine, t)
 }
 
 func TestMssqlWithCache(t *testing.T) {
@@ -41,14 +42,14 @@ func TestMssqlWithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 	engine.ShowSQL = showTestSql
 	engine.ShowErr = showTestSql
 	engine.ShowWarn = showTestSql
 	engine.ShowDebug = showTestSql
 
-	testAll(engine, t)
-	testAll2(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAll2(engine, t)
 }
 
 func newMssqlDriverDB() (*sql.DB, error) {
@@ -65,13 +66,13 @@ const (
 )
 
 func BenchmarkMssqlDriverInsert(t *testing.B) {
-	doBenchDriver(newMssqlDriverDB, createTableMssql, dropTableMssql,
-		doBenchDriverInsert, t)
+	DoBenchDriver(newMssqlDriverDB, createTableMssql, dropTableMssql,
+		DoBenchDriverInsert, t)
 }
 
 func BenchmarkMssqlDriverFind(t *testing.B) {
-	doBenchDriver(newMssqlDriverDB, createTableMssql, dropTableMssql,
-		doBenchDriverFind, t)
+	DoBenchDriver(newMssqlDriverDB, createTableMssql, dropTableMssql,
+		DoBenchDriverFind, t)
 }
 
 func BenchmarkMssqlNoCacheInsert(t *testing.B) {
@@ -82,7 +83,7 @@ func BenchmarkMssqlNoCacheInsert(t *testing.B) {
 		return
 	}
 	//engine.ShowSQL = true
-	doBenchInsert(engine, t)
+	DoBenchInsert(engine, t)
 }
 
 func BenchmarkMssqlNoCacheFind(t *testing.B) {
@@ -93,7 +94,7 @@ func BenchmarkMssqlNoCacheFind(t *testing.B) {
 		return
 	}
 	//engine.ShowSQL = true
-	doBenchFind(engine, t)
+	DoBenchFind(engine, t)
 }
 
 func BenchmarkMssqlNoCacheFindPtr(t *testing.B) {
@@ -104,7 +105,11 @@ func BenchmarkMssqlNoCacheFindPtr(t *testing.B) {
 		return
 	}
 	//engine.ShowSQL = true
-	doBenchFindPtr(engine, t)
+	DoBenchFindPtr(engine, t)
+}
+
+func newCacher() core.Cacher {
+	return xorm.NewLRUCacher2(xorm.NewMemoryStore(), time.Hour, 10000)
 }
 
 func BenchmarkMssqlCacheInsert(t *testing.B) {
@@ -114,9 +119,9 @@ func BenchmarkMssqlCacheInsert(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 
-	doBenchInsert(engine, t)
+	DoBenchInsert(engine, t)
 }
 
 func BenchmarkMssqlCacheFind(t *testing.B) {
@@ -126,9 +131,9 @@ func BenchmarkMssqlCacheFind(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 
-	doBenchFind(engine, t)
+	DoBenchFind(engine, t)
 }
 
 func BenchmarkMssqlCacheFindPtr(t *testing.B) {
@@ -138,7 +143,7 @@ func BenchmarkMssqlCacheFindPtr(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 
-	doBenchFindPtr(engine, t)
+	DoBenchFindPtr(engine, t)
 }

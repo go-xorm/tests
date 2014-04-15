@@ -7,7 +7,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
-	"github.com/go-xorm/xorm/caches"
 )
 
 /*
@@ -33,10 +32,10 @@ func TestMysql(t *testing.T) {
 	engine.ShowWarn = showTestSql
 	engine.ShowDebug = showTestSql
 
-	testAll(engine, t)
-	testAllSnakeMapper(engine, t)
-	testAll2(engine, t)
-	testAll3(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAllSnakeMapper(engine, t)
+	BaseTestAll2(engine, t)
+	BaseTestAll3(engine, t)
 }
 
 func TestMysqlSameMapper(t *testing.T) {
@@ -58,10 +57,10 @@ func TestMysqlSameMapper(t *testing.T) {
 	engine.ShowDebug = showTestSql
 	engine.SetMapper(core.SameMapper{})
 
-	testAll(engine, t)
-	testAllSameMapper(engine, t)
-	testAll2(engine, t)
-	testAll3(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAllSameMapper(engine, t)
+	BaseTestAll2(engine, t)
+	BaseTestAll3(engine, t)
 }
 
 func TestMysqlWithCache(t *testing.T) {
@@ -77,15 +76,15 @@ func TestMysqlWithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 	engine.ShowSQL = showTestSql
 	engine.ShowErr = showTestSql
 	engine.ShowWarn = showTestSql
 	engine.ShowDebug = showTestSql
 
-	testAll(engine, t)
-	testAllSnakeMapper(engine, t)
-	testAll2(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAllSnakeMapper(engine, t)
+	BaseTestAll2(engine, t)
 }
 
 func TestMysqlWithCacheSameMapper(t *testing.T) {
@@ -102,15 +101,15 @@ func TestMysqlWithCacheSameMapper(t *testing.T) {
 		return
 	}
 	engine.SetMapper(core.SameMapper{})
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 	engine.ShowSQL = showTestSql
 	engine.ShowErr = showTestSql
 	engine.ShowWarn = showTestSql
 	engine.ShowDebug = showTestSql
 
-	testAll(engine, t)
-	testAllSameMapper(engine, t)
-	testAll2(engine, t)
+	BaseTestAll(engine, t)
+	BaseTestAllSameMapper(engine, t)
+	BaseTestAll2(engine, t)
 }
 
 func newMysqlEngine() (*xorm.Engine, error) {
@@ -143,13 +142,13 @@ const (
 )
 
 func BenchmarkMysqlDriverInsert(t *testing.B) {
-	doBenchDriver(newMysqlDriverDB, createTableMySql, dropTableMySql,
-		doBenchDriverInsert, t)
+	DoBenchDriver(newMysqlDriverDB, createTableMySql, dropTableMySql,
+		DoBenchDriverInsert, t)
 }
 
 func BenchmarkMysqlDriverFind(t *testing.B) {
-	doBenchDriver(newMysqlDriverDB, createTableMySql, dropTableMySql,
-		doBenchDriverFind, t)
+	DoBenchDriver(newMysqlDriverDB, createTableMySql, dropTableMySql,
+		DoBenchDriverFind, t)
 }
 
 func BenchmarkMysqlNoCacheInsert(t *testing.B) {
@@ -160,7 +159,7 @@ func BenchmarkMysqlNoCacheInsert(t *testing.B) {
 		return
 	}
 	//engine.ShowSQL = true
-	doBenchInsert(engine, t)
+	DoBenchInsert(engine, t)
 }
 
 func BenchmarkMysqlNoCacheFind(t *testing.B) {
@@ -171,7 +170,7 @@ func BenchmarkMysqlNoCacheFind(t *testing.B) {
 		return
 	}
 	//engine.ShowSQL = true
-	doBenchFind(engine, t)
+	DoBenchFind(engine, t)
 }
 
 func BenchmarkMysqlNoCacheFindPtr(t *testing.B) {
@@ -182,7 +181,7 @@ func BenchmarkMysqlNoCacheFindPtr(t *testing.B) {
 		return
 	}
 	//engine.ShowSQL = true
-	doBenchFindPtr(engine, t)
+	DoBenchFindPtr(engine, t)
 }
 
 func BenchmarkMysqlCacheInsert(t *testing.B) {
@@ -192,9 +191,9 @@ func BenchmarkMysqlCacheInsert(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 
-	doBenchInsert(engine, t)
+	DoBenchInsert(engine, t)
 }
 
 func BenchmarkMysqlCacheFind(t *testing.B) {
@@ -204,9 +203,9 @@ func BenchmarkMysqlCacheFind(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 
-	doBenchFind(engine, t)
+	DoBenchFind(engine, t)
 }
 
 func BenchmarkMysqlCacheFindPtr(t *testing.B) {
@@ -216,7 +215,7 @@ func BenchmarkMysqlCacheFindPtr(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(xorm.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	engine.SetDefaultCacher(newCacher())
 
-	doBenchFindPtr(engine, t)
+	DoBenchFindPtr(engine, t)
 }
