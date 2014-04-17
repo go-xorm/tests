@@ -58,6 +58,10 @@ type Picture struct {
 	Uid         int64
 }
 
+func newCacher() core.Cacher {
+	return xorm.NewLRUCacher2(xorm.NewMemoryStore(), time.Hour, 10000)
+}
+
 func directCreateTable(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(&Userinfo{}, &Userdetail{})
 	if err != nil {

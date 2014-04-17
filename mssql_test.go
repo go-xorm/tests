@@ -6,9 +6,7 @@ package tests
 import (
 	"database/sql"
 	"testing"
-	"time"
 
-	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lunny/godbc"
 )
@@ -106,10 +104,6 @@ func BenchmarkMssqlNoCacheFindPtr(t *testing.B) {
 	}
 	//engine.ShowSQL = true
 	DoBenchFindPtr(engine, t)
-}
-
-func newCacher() core.Cacher {
-	return xorm.NewLRUCacher2(xorm.NewMemoryStore(), time.Hour, 10000)
 }
 
 func BenchmarkMssqlCacheInsert(t *testing.B) {
