@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	. "../"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 	_ "github.com/mattn/go-sqlite3"
@@ -27,10 +28,10 @@ func TestSqlite3(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -45,11 +46,11 @@ func TestSqlite3WithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.SetDefaultCacher(NewCacher())
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -64,10 +65,10 @@ func TestSqlite3SameMapper(t *testing.T) {
 		return
 	}
 	engine.SetMapper(core.SameMapper{})
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)
@@ -83,11 +84,11 @@ func TestSqlite3WithCacheSameMapper(t *testing.T) {
 		return
 	}
 	engine.SetMapper(core.SameMapper{})
-	engine.SetDefaultCacher(newCacher())
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.SetDefaultCacher(NewCacher())
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)
@@ -153,7 +154,7 @@ func BenchmarkSqlite3CacheInsert(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 	DoBenchInsert(engine, t)
 }
 
@@ -165,7 +166,7 @@ func BenchmarkSqlite3CacheFind(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 	DoBenchFind(engine, t)
 }
 
@@ -177,6 +178,6 @@ func BenchmarkSqlite3CacheFindPtr(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 	DoBenchFindPtr(engine, t)
 }

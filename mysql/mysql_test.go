@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
+	. ".."
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
@@ -27,10 +28,10 @@ func TestMysql(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -51,10 +52,10 @@ func TestMysqlSameMapper(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 	engine.SetMapper(core.SameMapper{})
 
 	BaseTestAll(engine, t)
@@ -76,11 +77,11 @@ func TestMysqlWithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.SetDefaultCacher(NewCacher())
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -101,11 +102,11 @@ func TestMysqlWithCacheSameMapper(t *testing.T) {
 		return
 	}
 	engine.SetMapper(core.SameMapper{})
-	engine.SetDefaultCacher(newCacher())
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.SetDefaultCacher(NewCacher())
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)
@@ -121,12 +122,12 @@ func mysqlDdlImport() error {
 	if err != nil {
 		return err
 	}
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
-	sqlResults, _ := engine.Import("testdata/mysql_ddl.sql")
+	sqlResults, _ := engine.Import("../testdata/mysql_ddl.sql")
 	engine.LogDebug("sql results: %v", sqlResults)
 	engine.Close()
 	return nil
@@ -136,18 +137,13 @@ func newMysqlDriverDB() (*sql.DB, error) {
 	return sql.Open("mysql", "root:@/xorm_test?charset=utf8")
 }
 
-const (
-	createTableMySql = "CREATE TABLE IF NOT EXISTS `big_struct` (`id` BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL, `name` VARCHAR(255) NULL, `title` VARCHAR(255) NULL, `age` VARCHAR(255) NULL, `alias` VARCHAR(255) NULL, `nick_name` VARCHAR(255) NULL);"
-	dropTableMySql   = "DROP TABLE IF EXISTS `big_struct`;"
-)
-
 func BenchmarkMysqlDriverInsert(t *testing.B) {
-	DoBenchDriver(newMysqlDriverDB, createTableMySql, dropTableMySql,
+	DoBenchDriver(newMysqlDriverDB, CreateTableMySql, DropTableMySql,
 		DoBenchDriverInsert, t)
 }
 
 func BenchmarkMysqlDriverFind(t *testing.B) {
-	DoBenchDriver(newMysqlDriverDB, createTableMySql, dropTableMySql,
+	DoBenchDriver(newMysqlDriverDB, CreateTableMySql, DropTableMySql,
 		DoBenchDriverFind, t)
 }
 
@@ -191,7 +187,7 @@ func BenchmarkMysqlCacheInsert(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchInsert(engine, t)
 }
@@ -203,7 +199,7 @@ func BenchmarkMysqlCacheFind(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFind(engine, t)
 }
@@ -215,7 +211,7 @@ func BenchmarkMysqlCacheFindPtr(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFindPtr(engine, t)
 }

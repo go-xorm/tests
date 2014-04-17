@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
+	. ".."
 	"github.com/go-xorm/xorm"
 	_ "github.com/ziutek/mymysql/godrv"
 )
@@ -12,8 +13,6 @@ import (
 CREATE DATABASE IF NOT EXISTS xorm_test CHARACTER SET
 utf8 COLLATE utf8_general_ci;
 */
-
-var showTestSql bool = true
 
 func TestMyMysql(t *testing.T) {
 	err := mymysqlDdlImport()
@@ -27,10 +26,10 @@ func TestMyMysql(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAll2(engine, t)
@@ -49,11 +48,11 @@ func TestMyMysqlWithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.SetDefaultCacher(NewCacher())
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAll2(engine, t)
@@ -68,12 +67,12 @@ func newMyMysqlDriverDB() (*sql.DB, error) {
 }
 
 func BenchmarkMyMysqlDriverInsert(t *testing.B) {
-	DoBenchDriver(newMyMysqlDriverDB, createTableMySql, dropTableMySql,
+	DoBenchDriver(newMyMysqlDriverDB, CreateTableMySql, DropTableMySql,
 		DoBenchDriverInsert, t)
 }
 
 func BenchmarkMyMysqlDriverFind(t *testing.B) {
-	DoBenchDriver(newMyMysqlDriverDB, createTableMySql, dropTableMySql,
+	DoBenchDriver(newMyMysqlDriverDB, CreateTableMySql, DropTableMySql,
 		DoBenchDriverFind, t)
 }
 
@@ -82,12 +81,12 @@ func mymysqlDdlImport() error {
 	if err != nil {
 		return err
 	}
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
-	sqlResults, _ := engine.Import("testdata/mysql_ddl.sql")
+	sqlResults, _ := engine.Import("../testdata/mysql_ddl.sql")
 	engine.LogDebug("sql results: %v", sqlResults)
 	engine.Close()
 	return nil
@@ -136,7 +135,7 @@ func BenchmarkMyMysqlCacheInsert(t *testing.B) {
 	}
 
 	defer engine.Close()
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchInsert(engine, t)
 }
@@ -149,7 +148,7 @@ func BenchmarkMyMysqlCacheFind(t *testing.B) {
 	}
 
 	defer engine.Close()
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFind(engine, t)
 }
@@ -162,7 +161,7 @@ func BenchmarkMyMysqlCacheFindPtr(t *testing.B) {
 	}
 
 	defer engine.Close()
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFindPtr(engine, t)
 }

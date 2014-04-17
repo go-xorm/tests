@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
+	. ".."
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
@@ -43,10 +44,10 @@ func TestPostgres(t *testing.T) {
 		return
 	}
 	defer engine.Close()
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -60,12 +61,12 @@ func TestPostgresWithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 	defer engine.Close()
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -80,10 +81,10 @@ func TestPostgresSameMapper(t *testing.T) {
 	}
 	defer engine.Close()
 	engine.SetMapper(core.SameMapper{})
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)
@@ -97,13 +98,13 @@ func TestPostgresWithCacheSameMapper(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 	defer engine.Close()
 	engine.SetMapper(core.SameMapper{})
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)
@@ -169,7 +170,7 @@ func BenchmarkPostgresCacheInsert(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchInsert(engine, t)
 }
@@ -182,7 +183,7 @@ func BenchmarkPostgresCacheFind(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFind(engine, t)
 }
@@ -195,7 +196,7 @@ func BenchmarkPostgresCacheFindPtr(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFindPtr(engine, t)
 }

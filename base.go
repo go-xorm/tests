@@ -11,6 +11,13 @@ import (
 	"github.com/go-xorm/xorm"
 )
 
+const (
+	CreateTableMySql = "CREATE TABLE IF NOT EXISTS `big_struct` (`id` BIGINT PRIMARY KEY AUTO_INCREMENT NOT NULL, `name` VARCHAR(255) NULL, `title` VARCHAR(255) NULL, `age` VARCHAR(255) NULL, `alias` VARCHAR(255) NULL, `nick_name` VARCHAR(255) NULL);"
+	DropTableMySql   = "DROP TABLE IF EXISTS `big_struct`;"
+)
+
+var ShowTestSql bool = true
+
 /*
 CREATE TABLE `userinfo` (
     `id` INT(10) NULL AUTO_INCREMENT,
@@ -58,7 +65,7 @@ type Picture struct {
 	Uid         int64
 }
 
-func newCacher() core.Cacher {
+func NewCacher() core.Cacher {
 	return xorm.NewLRUCacher2(xorm.NewMemoryStore(), time.Hour, 10000)
 }
 

@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"testing"
 
+	. ".."
 	"github.com/go-xorm/xorm"
 	_ "github.com/lunny/godbc"
 )
@@ -24,10 +25,10 @@ func TestMssql(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAll2(engine, t)
@@ -40,11 +41,11 @@ func TestMssqlWithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
-	engine.ShowSQL = showTestSql
-	engine.ShowErr = showTestSql
-	engine.ShowWarn = showTestSql
-	engine.ShowDebug = showTestSql
+	engine.SetDefaultCacher(NewCacher())
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAll2(engine, t)
@@ -113,7 +114,7 @@ func BenchmarkMssqlCacheInsert(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchInsert(engine, t)
 }
@@ -125,7 +126,7 @@ func BenchmarkMssqlCacheFind(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFind(engine, t)
 }
@@ -137,7 +138,7 @@ func BenchmarkMssqlCacheFindPtr(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(newCacher())
+	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFindPtr(engine, t)
 }
