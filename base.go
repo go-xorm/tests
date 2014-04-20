@@ -1569,10 +1569,11 @@ type allCols struct {
 	Binary     []byte `xorm:"BINARY(23)"`
 	VarBinary  []byte `xorm:"VARBINARY(12)"`
 
-	Date      time.Time `xorm:"DATE"`
-	DateTime  time.Time `xorm:"DATETIME"`
-	Time      time.Time `xorm:"TIME"`
-	TimeStamp time.Time `xorm:"TIMESTAMP"`
+	Date       time.Time `xorm:"DATE"`
+	DateTime   time.Time `xorm:"DATETIME"`
+	Time       time.Time `xorm:"TIME"`
+	TimeStamp  time.Time `xorm:"TIMESTAMP"`
+	TimeStampZ time.Time `xorm:"TIMESTAMPZ"`
 
 	Decimal float64 `xorm:"DECIMAL"`
 	Numeric float64 `xorm:"NUMERIC"`
@@ -1628,6 +1629,7 @@ func testColTypes(engine *xorm.Engine, t *testing.T) {
 		time.Now(),
 		time.Now(),
 		time.Now(),
+		time.Now(),
 
 		1.34,
 		2.44302346,
@@ -1678,6 +1680,7 @@ func testColTypes(engine *xorm.Engine, t *testing.T) {
 	newAc.TinyText = ""
 	newAc.MediumText = ""
 	newAc.Text = ""
+
 	cnt, err = engine.Delete(newAc)
 	if err != nil {
 		t.Error(err)
