@@ -1587,6 +1587,9 @@ type allCols struct {
 	LongBlob   []byte `xorm:"LONGBLOB"`
 	Bytea      []byte `xorm:"BYTEA"`
 
+	Map   map[string]string `xorm:"TEXT"`
+	Slice []string          `xorm:"TEXT"`
+
 	Bool bool `xorm:"BOOL"`
 
 	Serial int `xorm:"SERIAL"`
@@ -1642,6 +1645,9 @@ func testColTypes(engine *xorm.Engine, t *testing.T) {
 		[]byte("faffdasfdsadasf"),
 		[]byte("fafasdfsadffdasf"),
 
+		map[string]string{"1": "1", "2": "2"},
+		[]string{"1", "2", "3"},
+
 		true,
 
 		0,
@@ -1678,6 +1684,8 @@ func testColTypes(engine *xorm.Engine, t *testing.T) {
 	newAc.TinyText = ""
 	newAc.MediumText = ""
 	newAc.Text = ""
+	newAc.Map = nil
+	newAc.Slice = nil
 	cnt, err = engine.Delete(newAc)
 	if err != nil {
 		t.Error(err)
@@ -2642,7 +2650,7 @@ func testPrefixTableName(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
-	defer tempEngine.Close()
+	//defer tempEngine.Close()
 
 	tempEngine.ShowSQL = true
 	mapper := core.NewPrefixMapper(core.SnakeMapper{}, "xlw_")
