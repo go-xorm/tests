@@ -1516,6 +1516,11 @@ type tempUser2 struct {
 	Departname string
 }
 
+type tempUser3 struct {
+	temp       *tempUser `xorm:"extends"`
+	Departname string
+}
+
 func testExtends(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(&tempUser2{})
 	if err != nil {
@@ -1549,6 +1554,39 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
+
+	/*err = engine.DropTables(&tempUser3{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&tempUser3{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	tu4 := &tempUser3{&tempUser{0, "extends"}, "dev depart"}
+	_, err = engine.Insert(tu4)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	tu5 := &tempUser3{}
+	_, err = engine.Get(tu5)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	tu6 := &tempUser3{&tempUser{0, "extends update"}, ""}
+	_, err = engine.Id(tu5.temp.Id).Update(tu6)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}*/
 }
 
 type allCols struct {
