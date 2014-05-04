@@ -3,6 +3,7 @@ package tests
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -4354,6 +4355,16 @@ func testCustomTableName(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
+func testDump(engine *xorm.Engine, t *testing.T) {
+	fp := engine.Dialect().URI().DbName + ".sql"
+	os.Remove(fp)
+	err := engine.DumpAllToFile(fp)
+	if err != nil {
+		t.Error(err)
+		fmt.Println(err)
+	}
+}
+
 func BaseTestAll(engine *xorm.Engine, t *testing.T) {
 	fmt.Println("-------------- directCreateTable --------------")
 	directCreateTable(engine, t)
@@ -4387,6 +4398,10 @@ func BaseTestAll(engine *xorm.Engine, t *testing.T) {
 	in(engine, t)
 	fmt.Println("-------------- limit --------------")
 	limit(engine, t)
+	fmt.Println("-------------- testCustomTableName --------------")
+	testCustomTableName(engine, t)
+	fmt.Println("-------------- testDump --------------")
+	testDump(engine, t)
 }
 
 func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
@@ -4448,8 +4463,6 @@ func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
 	testProcessors(engine, t)
 	fmt.Println("-------------- transaction --------------")
 	transaction(engine, t)
-	fmt.Println("-------------- testCustomTableName --------------")
-	testCustomTableName(engine, t)
 }
 
 // !nash! the 3rd set of the test is intended for non-cache enabled engine
