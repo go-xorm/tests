@@ -1001,6 +1001,19 @@ func in(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
+	users = make([]Userinfo, 0)
+	err = engine.In("(id)", []int{7, 8, 9}).Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(users)
+	if len(users) != 3 {
+		err = errors.New("in uses should be 7,8,9 total 3")
+		t.Error(err)
+		panic(err)
+	}
+
 	for _, user := range users {
 		if user.Uid != 7 && user.Uid != 8 && user.Uid != 9 {
 			err = errors.New("in uses should be 7,8,9 total 3")
