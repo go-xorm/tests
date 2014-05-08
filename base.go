@@ -1531,7 +1531,7 @@ type tempUser2 struct {
 }
 
 type tempUser3 struct {
-	temp       *tempUser `xorm:"extends"`
+	Temp       *tempUser `xorm:"extends"`
 	Departname string
 }
 
@@ -1569,7 +1569,7 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	/*err = engine.DropTables(&tempUser3{})
+	err = engine.DropTables(&tempUser3{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -1594,13 +1594,36 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
+	if tu5.Temp == nil {
+		err = errors.New("error get data extends")
+		t.Error(err)
+		panic(err)
+	}
+	if tu5.Temp.Id != 1 || tu5.Temp.Username != "extends" ||
+		tu5.Departname != "dev depart" {
+		err = errors.New("error get data extends")
+		t.Error(err)
+		panic(err)
+	}
 
 	tu6 := &tempUser3{&tempUser{0, "extends update"}, ""}
-	_, err = engine.Id(tu5.temp.Id).Update(tu6)
+	_, err = engine.Id(tu5.Temp.Id).Update(tu6)
 	if err != nil {
 		t.Error(err)
 		panic(err)
-	}*/
+	}
+
+	users := make([]tempUser3, 0)
+	err = engine.Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(users) != 1 {
+		err = errors.New("error get data not 1")
+		t.Error(err)
+		panic(err)
+	}
 }
 
 type allCols struct {
