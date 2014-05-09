@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -1773,20 +1774,112 @@ func testColTypes(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
+type ConvString string
+
+func (s *ConvString) FromDB(data []byte) error {
+	*s = ConvString("prefix---" + string(data))
+	return nil
+}
+
+func (s *ConvString) ToDB() ([]byte, error) {
+	return []byte(string(*s)), nil
+}
+
+type ConvConfig struct {
+	Name string
+	Id   int64
+}
+
+func (s *ConvConfig) FromDB(data []byte) error {
+	return json.Unmarshal(data, s)
+}
+
+func (s *ConvConfig) ToDB() ([]byte, error) {
+	return json.Marshal(s)
+}
+
+type ConvStruct struct {
+	Conv  ConvString
+	Conv2 *ConvString
+	Cfg1  ConvConfig
+	Cfg2  *ConvConfig     `xorm:"TEXT"`
+	Cfg3  core.Conversion `xorm:"BLOB"`
+}
+
+func (c *ConvStruct) BeforeSet(name string, cell xorm.Cell) {
+	if name == "cfg3" || name == "Cfg3" {
+		c.Cfg3 = new(ConvConfig)
+	}
+}
+
+func testConversion(engine *xorm.Engine, t *testing.T) {
+	c := new(ConvStruct)
+	err := engine.DropTables(c)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	err = engine.Sync(c)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var s ConvString = "sssss"
+	c.Conv = "tttt"
+	c.Conv2 = &s
+	c.Cfg1 = ConvConfig{"mm", 1}
+	c.Cfg2 = &ConvConfig{"xx", 2}
+	c.Cfg3 = &ConvConfig{"zz", 3}
+
+	_, err = engine.Insert(c)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	c1 := new(ConvStruct)
+	_, err = engine.Get(c1)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if string(c1.Conv) != "prefix---tttt" {
+		err = fmt.Errorf("get conversion error prefix---tttt != %s", c1.Conv)
+		t.Error(err)
+		panic(err)
+	}
+
+	if c1.Conv2 == nil || *c1.Conv2 != "prefix---"+s {
+		err = fmt.Errorf("get conversion error2, %v", *c1.Conv2)
+		t.Error(err)
+		panic(err)
+	}
+
+	if c1.Cfg1 != c.Cfg1 {
+		err = fmt.Errorf("get conversion error3, %v", c1.Cfg1)
+		t.Error(err)
+		panic(err)
+	}
+
+	if c1.Cfg2 == nil || *c1.Cfg2 != *c.Cfg2 {
+		err = fmt.Errorf("get conversion error4, %v", *c1.Cfg2)
+		t.Error(err)
+		panic(err)
+	}
+
+	if c1.Cfg3 == nil || *c1.Cfg3.(*ConvConfig) != *c.Cfg3.(*ConvConfig) {
+		err = fmt.Errorf("get conversion error5, %v", *c1.Cfg3.(*ConvConfig))
+		t.Error(err)
+		panic(err)
+	}
+}
+
 type MyInt int
 type MyUInt uint
 type MyFloat float64
 type MyString string
-
-/*func (s *MyString) FromDB(data []byte) error {
-    reflect.
-    s MyString(data)
-    return nil
-}
-
-func (s *MyString) ToDB() ([]byte, error) {
-    return []byte(string(*s)), nil
-}*/
 
 type MyStruct struct {
 	Type      MyInt
@@ -4438,6 +4531,8 @@ func BaseTestAll(engine *xorm.Engine, t *testing.T) {
 	testCustomTableName(engine, t)
 	fmt.Println("-------------- testDump --------------")
 	testDump(engine, t)
+	fmt.Println("-------------- testConversion --------------")
+	testConversion(engine, t)
 }
 
 func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
