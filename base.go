@@ -1798,12 +1798,23 @@ func (s *ConvConfig) ToDB() ([]byte, error) {
 	return json.Marshal(s)
 }
 
+type SliceType []*ConvConfig
+
+func (s *SliceType) FromDB(data []byte) error {
+	return json.Unmarshal(data, s)
+}
+
+func (s *SliceType) ToDB() ([]byte, error) {
+	return json.Marshal(s)
+}
+
 type ConvStruct struct {
 	Conv  ConvString
 	Conv2 *ConvString
 	Cfg1  ConvConfig
 	Cfg2  *ConvConfig     `xorm:"TEXT"`
 	Cfg3  core.Conversion `xorm:"BLOB"`
+	Slice SliceType
 }
 
 func (c *ConvStruct) BeforeSet(name string, cell xorm.Cell) {
@@ -1831,6 +1842,7 @@ func testConversion(engine *xorm.Engine, t *testing.T) {
 	c.Cfg1 = ConvConfig{"mm", 1}
 	c.Cfg2 = &ConvConfig{"xx", 2}
 	c.Cfg3 = &ConvConfig{"zz", 3}
+	c.Slice = []*ConvConfig{{"yy", 4}, {"ff", 5}}
 
 	_, err = engine.Insert(c)
 	if err != nil {
@@ -1871,6 +1883,19 @@ func testConversion(engine *xorm.Engine, t *testing.T) {
 
 	if c1.Cfg3 == nil || *c1.Cfg3.(*ConvConfig) != *c.Cfg3.(*ConvConfig) {
 		err = fmt.Errorf("get conversion error5, %v", *c1.Cfg3.(*ConvConfig))
+		t.Error(err)
+		panic(err)
+	}
+
+	if len(c1.Slice) != 2 {
+		err = fmt.Errorf("get conversion error6, should be 2")
+		t.Error(err)
+		panic(err)
+	}
+
+	if *c1.Slice[0] != *c.Slice[0] ||
+		*c1.Slice[1] != *c.Slice[1] {
+		err = fmt.Errorf("get conversion error7, should be %v", c1.Slice)
 		t.Error(err)
 		panic(err)
 	}
