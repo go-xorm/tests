@@ -1657,6 +1657,7 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 	}
 	fmt.Println(info)
 
+	fmt.Println("----join--info2")
 	var info2 UserAndDetail
 	b, err = engine.Table(&Userinfo{}).Join("LEFT", qt(ud), qt(ui)+"."+qt("detail_id")+" = "+qt(ud)+"."+qt(uiid)).Get(&info2)
 	if err != nil {
@@ -1674,6 +1675,15 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(info2)
+
+	fmt.Println("----join--infos2")
+	var infos2 = make([]UserAndDetail, 0)
+	err = engine.Table(&Userinfo{}).Join("LEFT", qt(ud), qt(ui)+"."+qt("detail_id")+" = "+qt(ud)+"."+qt(uiid)).Find(&infos2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(infos2)
 }
 
 type allCols struct {
