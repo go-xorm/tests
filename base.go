@@ -1536,6 +1536,11 @@ type tempUser3 struct {
 	Departname string
 }
 
+type UserAndDetail struct {
+	Userinfo   `xorm:"extends"`
+	Userdetail `xorm:"extends"`
+}
+
 func testExtends(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(&tempUser2{})
 	if err != nil {
@@ -1625,6 +1630,50 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
+
+	var info UserAndDetail
+	qt := engine.Quote
+	engine.Update(&Userinfo{Detail: Userdetail{Id: 1}})
+	ui := engine.TableMapper.Obj2Table("Userinfo")
+	ud := engine.TableMapper.Obj2Table("Userdetail")
+	uiid := engine.TableMapper.Obj2Table("Id")
+	udid := "detail_id"
+	sql := fmt.Sprintf("select * from %s, %s where %s.%s = %s.%s",
+		qt(ui), qt(ud), qt(ui), qt(udid), qt(ud), qt(uiid))
+	b, err := engine.Sql(sql).Get(&info)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !b {
+		err = errors.New("should has lest one record")
+		t.Error(err)
+		panic(err)
+	}
+	if info.Userinfo.Uid == 0 || info.Userdetail.Id == 0 {
+		err = errors.New("all of the id should has value")
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(info)
+
+	var info2 UserAndDetail
+	b, err = engine.Table(&Userinfo{}).Join("LEFT", qt(ud), qt(ui)+"."+qt("detail_id")+" = "+qt(ud)+"."+qt(uiid)).Get(&info2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !b {
+		err = errors.New("should has lest one record")
+		t.Error(err)
+		panic(err)
+	}
+	if info2.Userinfo.Uid == 0 || info2.Userdetail.Id == 0 {
+		err = errors.New("all of the id should has value")
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(info2)
 }
 
 type allCols struct {
