@@ -86,7 +86,7 @@ func mymysqlDdlImport() error {
 	engine.ShowWarn = ShowTestSql
 	engine.ShowDebug = ShowTestSql
 
-	sqlResults, _ := engine.Import("../testdata/mysql_ddl.sql")
+	sqlResults, _ := engine.ImportFile("../testdata/mysql_ddl.sql")
 	engine.LogDebug("sql results: %v", sqlResults)
 	engine.Close()
 	return nil
