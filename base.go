@@ -67,30 +67,34 @@ type Picture struct {
 	Uid         int64
 }
 
+type Numeric struct {
+	Numeric float64 `xorm:"numeric(26,2)"`
+}
+
 func NewCacher() core.Cacher {
 	return xorm.NewLRUCacher2(xorm.NewMemoryStore(), time.Hour, 10000)
 }
 
 func directCreateTable(engine *xorm.Engine, t *testing.T) {
-	err := engine.DropTables(&Userinfo{}, &Userdetail{})
+	err := engine.DropTables(&Userinfo{}, &Userdetail{}, &Numeric{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
-	err = engine.Sync(&Userinfo{}, &Userdetail{}, new(Picture))
+	err = engine.Sync(&Userinfo{}, &Userdetail{}, new(Picture), new(Numeric))
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
-	err = engine.DropTables(&Userinfo{}, &Userdetail{})
+	err = engine.DropTables(&Userinfo{}, &Userdetail{}, new(Numeric))
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
-	err = engine.CreateTables(&Userinfo{}, &Userdetail{})
+	err = engine.CreateTables(&Userinfo{}, &Userdetail{}, new(Numeric))
 	if err != nil {
 		t.Error(err)
 		panic(err)
