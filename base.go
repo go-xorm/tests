@@ -222,11 +222,34 @@ func insertAutoIncr(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
-type BigInsert struct {
+type DefaultInsert struct {
+	Id      int64
+	Status  int `xorm:"default -1"`
+	Name    string
+	Updated time.Time `xorm:"updated"`
 }
 
-func insertDefault(engine *xorm.Engine, t *testing.T) {
+func testInsertDefault(engine *xorm.Engine, t *testing.T) {
+	/*di := new(DefaultInsert)
+	err := engine.Sync(di)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = engine.Insert(&DefaultInsert{Name: "test"})
+	if err != nil {
+		t.Error(err)
+	}
 
+	has, err := engine.Get(di)
+	if err != nil {
+		t.Error(err)
+	}
+	if !has {
+		t.Error(errors.New("error with no data"))
+	}
+	if di.Status != -1 {
+		t.Error(errors.New("inserted error data"))
+	}*/
 }
 
 func insertMulti(engine *xorm.Engine, t *testing.T) {
@@ -311,6 +334,14 @@ type Article struct {
 }
 
 type Condi map[string]interface{}
+
+type UpdateAllCols struct {
+	Ptr    *string
+	Id     int64
+	Bool   bool
+	String string
+	TEST   string
+}
 
 func update(engine *xorm.Engine, t *testing.T) {
 	// update by id
@@ -404,13 +435,9 @@ func update(engine *xorm.Engine, t *testing.T) {
 		return
 	}
 
-	type UpdateAllCols struct {
-		Id     int64
-		Bool   bool
-		String string
-	}
+	var s = "test"
 
-	col1 := &UpdateAllCols{}
+	col1 := &UpdateAllCols{Ptr: &s}
 	err = engine.Sync(col1)
 	if err != nil {
 		t.Error(err)
@@ -423,7 +450,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	col2 := &UpdateAllCols{col1.Id, true, ""}
+	col2 := &UpdateAllCols{nil, col1.Id, true, "", ""}
 	_, err = engine.Id(col2.Id).AllCols().Update(col2)
 	if err != nil {
 		t.Error(err)
@@ -4587,6 +4614,8 @@ func BaseTestAll(engine *xorm.Engine, t *testing.T) {
 	directCreateTable(engine, t)
 	fmt.Println("-------------- insert --------------")
 	insert(engine, t)
+	fmt.Println("-------------- testInsertDefault --------------")
+	testInsertDefault(engine, t)
 	fmt.Println("-------------- insertAutoIncr --------------")
 	insertAutoIncr(engine, t)
 	fmt.Println("-------------- insertMulti --------------")

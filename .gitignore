@@ -1,6 +1,2 @@
 *.db
-mysql/*.sql
-sqlite3/*.sql
-mymysql/*.sql
-mssql/*.sql
-postgres/*.sql
+*.sql
