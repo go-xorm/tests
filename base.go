@@ -336,11 +336,10 @@ type Article struct {
 type Condi map[string]interface{}
 
 type UpdateAllCols struct {
-	Ptr    *string
 	Id     int64
 	Bool   bool
 	String string
-	TEST   string
+	Ptr    *string
 }
 
 func update(engine *xorm.Engine, t *testing.T) {
@@ -450,7 +449,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	col2 := &UpdateAllCols{nil, col1.Id, true, "", ""}
+	col2 := &UpdateAllCols{col1.Id, true, "", nil}
 	_, err = engine.Id(col2.Id).AllCols().Update(col2)
 	if err != nil {
 		t.Error(err)
@@ -548,7 +547,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 
-		cnt, err := engine.Id(1).Incr("cnt").Update(col1)
+		cnt, err := engine.Id(col1.Id).Incr("cnt").Update(col1)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -560,7 +559,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 		}
 
 		newCol := new(UpdateIncr)
-		has, err := engine.Id(1).Get(newCol)
+		has, err := engine.Id(col1.Id).Get(newCol)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -571,7 +570,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 		if 1 != newCol.Cnt {
-			err = errors.New("incr failed")
+			err = fmt.Errorf("incr failed %v %v %v", newCol.Cnt, newCol, col1)
 			t.Error(err)
 			panic(err)
 		}
@@ -672,12 +671,6 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		return
 	}
 
-	type UpdateAllCols struct {
-		Id     int64
-		Bool   bool
-		String string
-	}
-
 	col1 := &UpdateAllCols{}
 	err = engine.Sync(col1)
 	if err != nil {
@@ -691,7 +684,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	col2 := &UpdateAllCols{col1.Id, true, ""}
+	col2 := &UpdateAllCols{col1.Id, true, "", nil}
 	_, err = engine.Id(col2.Id).AllCols().Update(col2)
 	if err != nil {
 		t.Error(err)
@@ -789,7 +782,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 
-		cnt, err := engine.Id(1).Incr("`Cnt`").Update(col1)
+		cnt, err := engine.Id(col1.Id).Incr("`Cnt`").Update(col1)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -801,7 +794,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		}
 
 		newCol := new(UpdateIncr)
-		has, err := engine.Id(1).Get(newCol)
+		has, err := engine.Id(col1.Id).Get(newCol)
 		if err != nil {
 			t.Error(err)
 			panic(err)
