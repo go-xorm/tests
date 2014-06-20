@@ -1,18 +1,23 @@
 package tests
 
-//
-// +build windows
-
 import (
 	"database/sql"
+	"runtime"
 	"testing"
 
-	. ".."
 	"github.com/go-xorm/xorm"
 	_ "github.com/lunny/godbc"
 )
 
-const mssqlConnStr = "driver={SQL Server};Server=192.168.20.135;Database=xorm_test; uid=sa; pwd=1234;"
+var mssqlConnStr string
+
+func init() {
+	if runtime.GOOS == "windows" {
+		mssqlConnStr = "driver={SQL Server};Server=192.168.3.103;Database=xorm_test; uid=sa; pwd=1234;"
+	} else {
+		mssqlConnStr = "driver={freetds};Server=192.168.3.103;Database=xorm_test; uid=sa; pwd=1234;"
+	}
+}
 
 func newMssqlEngine() (*xorm.Engine, error) {
 	return xorm.NewEngine("odbc", mssqlConnStr)

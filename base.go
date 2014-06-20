@@ -1,8 +1,10 @@
 package tests
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -65,30 +67,34 @@ type Picture struct {
 	Uid         int64
 }
 
+type Numeric struct {
+	Numeric float64 `xorm:"numeric(26,2)"`
+}
+
 func NewCacher() core.Cacher {
 	return xorm.NewLRUCacher2(xorm.NewMemoryStore(), time.Hour, 10000)
 }
 
 func directCreateTable(engine *xorm.Engine, t *testing.T) {
-	err := engine.DropTables(&Userinfo{}, &Userdetail{})
+	err := engine.DropTables(&Userinfo{}, &Userdetail{}, &Numeric{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
-	err = engine.Sync(&Userinfo{}, &Userdetail{}, new(Picture))
+	err = engine.Sync(&Userinfo{}, &Userdetail{}, new(Picture), new(Numeric))
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
-	err = engine.DropTables(&Userinfo{}, &Userdetail{})
+	err = engine.DropTables(&Userinfo{}, &Userdetail{}, new(Numeric))
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
-	err = engine.CreateTables(&Userinfo{}, &Userdetail{})
+	err = engine.CreateTables(&Userinfo{}, &Userdetail{}, new(Numeric))
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -216,11 +222,34 @@ func insertAutoIncr(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
-type BigInsert struct {
+type DefaultInsert struct {
+	Id      int64
+	Status  int `xorm:"default -1"`
+	Name    string
+	Updated time.Time `xorm:"updated"`
 }
 
-func insertDefault(engine *xorm.Engine, t *testing.T) {
+func testInsertDefault(engine *xorm.Engine, t *testing.T) {
+	/*di := new(DefaultInsert)
+	err := engine.Sync(di)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = engine.Insert(&DefaultInsert{Name: "test"})
+	if err != nil {
+		t.Error(err)
+	}
 
+	has, err := engine.Get(di)
+	if err != nil {
+		t.Error(err)
+	}
+	if !has {
+		t.Error(errors.New("error with no data"))
+	}
+	if di.Status != -1 {
+		t.Error(errors.New("inserted error data"))
+	}*/
 }
 
 func insertMulti(engine *xorm.Engine, t *testing.T) {
@@ -305,6 +334,13 @@ type Article struct {
 }
 
 type Condi map[string]interface{}
+
+type UpdateAllCols struct {
+	Id     int64
+	Bool   bool
+	String string
+	Ptr    *string
+}
 
 func update(engine *xorm.Engine, t *testing.T) {
 	// update by id
@@ -398,13 +434,9 @@ func update(engine *xorm.Engine, t *testing.T) {
 		return
 	}
 
-	type UpdateAllCols struct {
-		Id     int64
-		Bool   bool
-		String string
-	}
+	var s = "test"
 
-	col1 := &UpdateAllCols{}
+	col1 := &UpdateAllCols{Ptr: &s}
 	err = engine.Sync(col1)
 	if err != nil {
 		t.Error(err)
@@ -417,7 +449,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	col2 := &UpdateAllCols{col1.Id, true, ""}
+	col2 := &UpdateAllCols{col1.Id, true, "", nil}
 	_, err = engine.Id(col2.Id).AllCols().Update(col2)
 	if err != nil {
 		t.Error(err)
@@ -515,7 +547,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 
-		cnt, err := engine.Id(1).Incr("cnt").Update(col1)
+		cnt, err := engine.Id(col1.Id).Incr("cnt").Update(col1)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -527,7 +559,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 		}
 
 		newCol := new(UpdateIncr)
-		has, err := engine.Id(1).Get(newCol)
+		has, err := engine.Id(col1.Id).Get(newCol)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -538,7 +570,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 		if 1 != newCol.Cnt {
-			err = errors.New("incr failed")
+			err = fmt.Errorf("incr failed %v %v %v", newCol.Cnt, newCol, col1)
 			t.Error(err)
 			panic(err)
 		}
@@ -639,12 +671,6 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		return
 	}
 
-	type UpdateAllCols struct {
-		Id     int64
-		Bool   bool
-		String string
-	}
-
 	col1 := &UpdateAllCols{}
 	err = engine.Sync(col1)
 	if err != nil {
@@ -658,7 +684,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	col2 := &UpdateAllCols{col1.Id, true, ""}
+	col2 := &UpdateAllCols{col1.Id, true, "", nil}
 	_, err = engine.Id(col2.Id).AllCols().Update(col2)
 	if err != nil {
 		t.Error(err)
@@ -756,7 +782,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 
-		cnt, err := engine.Id(1).Incr("`Cnt`").Update(col1)
+		cnt, err := engine.Id(col1.Id).Incr("`Cnt`").Update(col1)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -768,7 +794,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		}
 
 		newCol := new(UpdateIncr)
-		has, err := engine.Id(1).Get(newCol)
+		has, err := engine.Id(col1.Id).Get(newCol)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -989,6 +1015,19 @@ func where(engine *xorm.Engine, t *testing.T) {
 func in(engine *xorm.Engine, t *testing.T) {
 	users := make([]Userinfo, 0)
 	err := engine.In("(id)", 7, 8, 9).Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(users)
+	if len(users) != 3 {
+		err = errors.New("in uses should be 7,8,9 total 3")
+		t.Error(err)
+		panic(err)
+	}
+
+	users = make([]Userinfo, 0)
+	err = engine.In("(id)", []int{7, 8, 9}).Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -1516,6 +1555,16 @@ type tempUser2 struct {
 	Departname string
 }
 
+type tempUser3 struct {
+	Temp       *tempUser `xorm:"extends"`
+	Departname string
+}
+
+type UserAndDetail struct {
+	Userinfo   `xorm:"extends"`
+	Userdetail `xorm:"extends"`
+}
+
 func testExtends(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(&tempUser2{})
 	if err != nil {
@@ -1549,6 +1598,116 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
+
+	err = engine.DropTables(&tempUser3{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&tempUser3{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	tu4 := &tempUser3{&tempUser{0, "extends"}, "dev depart"}
+	_, err = engine.Insert(tu4)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	tu5 := &tempUser3{}
+	_, err = engine.Get(tu5)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if tu5.Temp == nil {
+		err = errors.New("error get data extends")
+		t.Error(err)
+		panic(err)
+	}
+	if tu5.Temp.Id != 1 || tu5.Temp.Username != "extends" ||
+		tu5.Departname != "dev depart" {
+		err = errors.New("error get data extends")
+		t.Error(err)
+		panic(err)
+	}
+
+	tu6 := &tempUser3{&tempUser{0, "extends update"}, ""}
+	_, err = engine.Id(tu5.Temp.Id).Update(tu6)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	users := make([]tempUser3, 0)
+	err = engine.Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(users) != 1 {
+		err = errors.New("error get data not 1")
+		t.Error(err)
+		panic(err)
+	}
+
+	var info UserAndDetail
+	qt := engine.Quote
+	engine.Update(&Userinfo{Detail: Userdetail{Id: 1}})
+	ui := engine.TableMapper.Obj2Table("Userinfo")
+	ud := engine.TableMapper.Obj2Table("Userdetail")
+	uiid := engine.TableMapper.Obj2Table("Id")
+	udid := "detail_id"
+	sql := fmt.Sprintf("select * from %s, %s where %s.%s = %s.%s",
+		qt(ui), qt(ud), qt(ui), qt(udid), qt(ud), qt(uiid))
+	b, err := engine.Sql(sql).Get(&info)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !b {
+		err = errors.New("should has lest one record")
+		t.Error(err)
+		panic(err)
+	}
+	if info.Userinfo.Uid == 0 || info.Userdetail.Id == 0 {
+		err = errors.New("all of the id should has value")
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(info)
+
+	fmt.Println("----join--info2")
+	var info2 UserAndDetail
+	b, err = engine.Table(&Userinfo{}).Join("LEFT", qt(ud), qt(ui)+"."+qt("detail_id")+" = "+qt(ud)+"."+qt(uiid)).Get(&info2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !b {
+		err = errors.New("should has lest one record")
+		t.Error(err)
+		panic(err)
+	}
+	if info2.Userinfo.Uid == 0 || info2.Userdetail.Id == 0 {
+		err = errors.New("all of the id should has value")
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(info2)
+
+	fmt.Println("----join--infos2")
+	var infos2 = make([]UserAndDetail, 0)
+	err = engine.Table(&Userinfo{}).Join("LEFT", qt(ud), qt(ui)+"."+qt("detail_id")+" = "+qt(ud)+"."+qt(uiid)).Find(&infos2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(infos2)
 }
 
 type allCols struct {
@@ -1587,6 +1746,9 @@ type allCols struct {
 	MediumBlob []byte `xorm:"MEDIUMBLOB"`
 	LongBlob   []byte `xorm:"LONGBLOB"`
 	Bytea      []byte `xorm:"BYTEA"`
+
+	Map   map[string]string `xorm:"TEXT"`
+	Slice []string          `xorm:"TEXT"`
 
 	Bool bool `xorm:"BOOL"`
 
@@ -1644,6 +1806,9 @@ func testColTypes(engine *xorm.Engine, t *testing.T) {
 		[]byte("faffdasfdsadasf"),
 		[]byte("fafasdfsadffdasf"),
 
+		map[string]string{"1": "1", "2": "2"},
+		[]string{"1", "2", "3"},
+
 		true,
 
 		0,
@@ -1680,7 +1845,8 @@ func testColTypes(engine *xorm.Engine, t *testing.T) {
 	newAc.TinyText = ""
 	newAc.MediumText = ""
 	newAc.Text = ""
-
+	newAc.Map = nil
+	newAc.Slice = nil
 	cnt, err = engine.Delete(newAc)
 	if err != nil {
 		t.Error(err)
@@ -1693,20 +1859,137 @@ func testColTypes(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
+type ConvString string
+
+func (s *ConvString) FromDB(data []byte) error {
+	*s = ConvString("prefix---" + string(data))
+	return nil
+}
+
+func (s *ConvString) ToDB() ([]byte, error) {
+	return []byte(string(*s)), nil
+}
+
+type ConvConfig struct {
+	Name string
+	Id   int64
+}
+
+func (s *ConvConfig) FromDB(data []byte) error {
+	return json.Unmarshal(data, s)
+}
+
+func (s *ConvConfig) ToDB() ([]byte, error) {
+	return json.Marshal(s)
+}
+
+type SliceType []*ConvConfig
+
+func (s *SliceType) FromDB(data []byte) error {
+	return json.Unmarshal(data, s)
+}
+
+func (s *SliceType) ToDB() ([]byte, error) {
+	return json.Marshal(s)
+}
+
+type ConvStruct struct {
+	Conv  ConvString
+	Conv2 *ConvString
+	Cfg1  ConvConfig
+	Cfg2  *ConvConfig     `xorm:"TEXT"`
+	Cfg3  core.Conversion `xorm:"BLOB"`
+	Slice SliceType
+}
+
+func (c *ConvStruct) BeforeSet(name string, cell xorm.Cell) {
+	if name == "cfg3" || name == "Cfg3" {
+		c.Cfg3 = new(ConvConfig)
+	}
+}
+
+func testConversion(engine *xorm.Engine, t *testing.T) {
+	c := new(ConvStruct)
+	err := engine.DropTables(c)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	err = engine.Sync(c)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var s ConvString = "sssss"
+	c.Conv = "tttt"
+	c.Conv2 = &s
+	c.Cfg1 = ConvConfig{"mm", 1}
+	c.Cfg2 = &ConvConfig{"xx", 2}
+	c.Cfg3 = &ConvConfig{"zz", 3}
+	c.Slice = []*ConvConfig{{"yy", 4}, {"ff", 5}}
+
+	_, err = engine.Insert(c)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	c1 := new(ConvStruct)
+	_, err = engine.Get(c1)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if string(c1.Conv) != "prefix---tttt" {
+		err = fmt.Errorf("get conversion error prefix---tttt != %s", c1.Conv)
+		t.Error(err)
+		panic(err)
+	}
+
+	if c1.Conv2 == nil || *c1.Conv2 != "prefix---"+s {
+		err = fmt.Errorf("get conversion error2, %v", *c1.Conv2)
+		t.Error(err)
+		panic(err)
+	}
+
+	if c1.Cfg1 != c.Cfg1 {
+		err = fmt.Errorf("get conversion error3, %v", c1.Cfg1)
+		t.Error(err)
+		panic(err)
+	}
+
+	if c1.Cfg2 == nil || *c1.Cfg2 != *c.Cfg2 {
+		err = fmt.Errorf("get conversion error4, %v", *c1.Cfg2)
+		t.Error(err)
+		panic(err)
+	}
+
+	if c1.Cfg3 == nil || *c1.Cfg3.(*ConvConfig) != *c.Cfg3.(*ConvConfig) {
+		err = fmt.Errorf("get conversion error5, %v", *c1.Cfg3.(*ConvConfig))
+		t.Error(err)
+		panic(err)
+	}
+
+	if len(c1.Slice) != 2 {
+		err = fmt.Errorf("get conversion error6, should be 2")
+		t.Error(err)
+		panic(err)
+	}
+
+	if *c1.Slice[0] != *c.Slice[0] ||
+		*c1.Slice[1] != *c.Slice[1] {
+		err = fmt.Errorf("get conversion error7, should be %v", c1.Slice)
+		t.Error(err)
+		panic(err)
+	}
+}
+
 type MyInt int
 type MyUInt uint
 type MyFloat float64
 type MyString string
-
-/*func (s *MyString) FromDB(data []byte) error {
-    reflect.
-    s MyString(data)
-    return nil
-}
-
-func (s *MyString) ToDB() ([]byte, error) {
-    return []byte(string(*s)), nil
-}*/
 
 type MyStruct struct {
 	Type      MyInt
@@ -2645,7 +2928,7 @@ func testPrefixTableName(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
-	defer tempEngine.Close()
+	//defer tempEngine.Close()
 
 	tempEngine.ShowSQL = true
 	mapper := core.NewPrefixMapper(core.SnakeMapper{}, "xlw_")
@@ -4311,11 +4594,23 @@ func testCustomTableName(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
+func testDump(engine *xorm.Engine, t *testing.T) {
+	fp := engine.Dialect().URI().DbName + ".sql"
+	os.Remove(fp)
+	err := engine.DumpAllToFile(fp)
+	if err != nil {
+		t.Error(err)
+		fmt.Println(err)
+	}
+}
+
 func BaseTestAll(engine *xorm.Engine, t *testing.T) {
 	fmt.Println("-------------- directCreateTable --------------")
 	directCreateTable(engine, t)
 	fmt.Println("-------------- insert --------------")
 	insert(engine, t)
+	fmt.Println("-------------- testInsertDefault --------------")
+	testInsertDefault(engine, t)
 	fmt.Println("-------------- insertAutoIncr --------------")
 	insertAutoIncr(engine, t)
 	fmt.Println("-------------- insertMulti --------------")
@@ -4344,6 +4639,12 @@ func BaseTestAll(engine *xorm.Engine, t *testing.T) {
 	in(engine, t)
 	fmt.Println("-------------- limit --------------")
 	limit(engine, t)
+	fmt.Println("-------------- testCustomTableName --------------")
+	testCustomTableName(engine, t)
+	fmt.Println("-------------- testDump --------------")
+	testDump(engine, t)
+	fmt.Println("-------------- testConversion --------------")
+	testConversion(engine, t)
 }
 
 func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
@@ -4405,8 +4706,6 @@ func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
 	testProcessors(engine, t)
 	fmt.Println("-------------- transaction --------------")
 	transaction(engine, t)
-	fmt.Println("-------------- testCustomTableName --------------")
-	testCustomTableName(engine, t)
 }
 
 // !nash! the 3rd set of the test is intended for non-cache enabled engine

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"testing"
 
-	. ".."
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
@@ -127,7 +126,7 @@ func mysqlDdlImport() error {
 	engine.ShowWarn = ShowTestSql
 	engine.ShowDebug = ShowTestSql
 
-	sqlResults, _ := engine.Import("../testdata/mysql_ddl.sql")
+	sqlResults, _ := engine.ImportFile("../testdata/mysql_ddl.sql")
 	engine.LogDebug("sql results: %v", sqlResults)
 	engine.Close()
 	return nil
