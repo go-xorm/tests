@@ -222,11 +222,34 @@ func insertAutoIncr(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
-type BigInsert struct {
+type DefaultInsert struct {
+	Id      int64
+	Status  int `xorm:"default -1"`
+	Name    string
+	Updated time.Time `xorm:"updated"`
 }
 
-func insertDefault(engine *xorm.Engine, t *testing.T) {
+func testInsertDefault(engine *xorm.Engine, t *testing.T) {
+	/*di := new(DefaultInsert)
+	err := engine.Sync(di)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = engine.Insert(&DefaultInsert{Name: "test"})
+	if err != nil {
+		t.Error(err)
+	}
 
+	has, err := engine.Get(di)
+	if err != nil {
+		t.Error(err)
+	}
+	if !has {
+		t.Error(errors.New("error with no data"))
+	}
+	if di.Status != -1 {
+		t.Error(errors.New("inserted error data"))
+	}*/
 }
 
 func insertMulti(engine *xorm.Engine, t *testing.T) {
@@ -311,6 +334,13 @@ type Article struct {
 }
 
 type Condi map[string]interface{}
+
+type UpdateAllCols struct {
+	Id     int64
+	Bool   bool
+	String string
+	Ptr    *string
+}
 
 func update(engine *xorm.Engine, t *testing.T) {
 	// update by id
@@ -404,13 +434,9 @@ func update(engine *xorm.Engine, t *testing.T) {
 		return
 	}
 
-	type UpdateAllCols struct {
-		Id     int64
-		Bool   bool
-		String string
-	}
+	var s = "test"
 
-	col1 := &UpdateAllCols{}
+	col1 := &UpdateAllCols{Ptr: &s}
 	err = engine.Sync(col1)
 	if err != nil {
 		t.Error(err)
@@ -423,7 +449,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	col2 := &UpdateAllCols{col1.Id, true, ""}
+	col2 := &UpdateAllCols{col1.Id, true, "", nil}
 	_, err = engine.Id(col2.Id).AllCols().Update(col2)
 	if err != nil {
 		t.Error(err)
@@ -521,7 +547,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 
-		cnt, err := engine.Id(1).Incr("cnt").Update(col1)
+		cnt, err := engine.Id(col1.Id).Incr("cnt").Update(col1)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -533,7 +559,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 		}
 
 		newCol := new(UpdateIncr)
-		has, err := engine.Id(1).Get(newCol)
+		has, err := engine.Id(col1.Id).Get(newCol)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -544,7 +570,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 		if 1 != newCol.Cnt {
-			err = errors.New("incr failed")
+			err = fmt.Errorf("incr failed %v %v %v", newCol.Cnt, newCol, col1)
 			t.Error(err)
 			panic(err)
 		}
@@ -645,12 +671,6 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		return
 	}
 
-	type UpdateAllCols struct {
-		Id     int64
-		Bool   bool
-		String string
-	}
-
 	col1 := &UpdateAllCols{}
 	err = engine.Sync(col1)
 	if err != nil {
@@ -664,7 +684,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	col2 := &UpdateAllCols{col1.Id, true, ""}
+	col2 := &UpdateAllCols{col1.Id, true, "", nil}
 	_, err = engine.Id(col2.Id).AllCols().Update(col2)
 	if err != nil {
 		t.Error(err)
@@ -762,7 +782,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 
-		cnt, err := engine.Id(1).Incr("`Cnt`").Update(col1)
+		cnt, err := engine.Id(col1.Id).Incr("`Cnt`").Update(col1)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -774,7 +794,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		}
 
 		newCol := new(UpdateIncr)
-		has, err := engine.Id(1).Get(newCol)
+		has, err := engine.Id(col1.Id).Get(newCol)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -1708,10 +1728,11 @@ type allCols struct {
 	Binary     []byte `xorm:"BINARY(23)"`
 	VarBinary  []byte `xorm:"VARBINARY(12)"`
 
-	Date      time.Time `xorm:"DATE"`
-	DateTime  time.Time `xorm:"DATETIME"`
-	Time      time.Time `xorm:"TIME"`
-	TimeStamp time.Time `xorm:"TIMESTAMP"`
+	Date       time.Time `xorm:"DATE"`
+	DateTime   time.Time `xorm:"DATETIME"`
+	Time       time.Time `xorm:"TIME"`
+	TimeStamp  time.Time `xorm:"TIMESTAMP"`
+	TimeStampZ time.Time `xorm:"TIMESTAMPZ"`
 
 	Decimal float64 `xorm:"DECIMAL"`
 	Numeric float64 `xorm:"NUMERIC"`
@@ -1766,6 +1787,7 @@ func testColTypes(engine *xorm.Engine, t *testing.T) {
 		[]byte("fdafsafdasfdsafsa"),
 		[]byte("fdsafsdafs"),
 
+		time.Now(),
 		time.Now(),
 		time.Now(),
 		time.Now(),
@@ -4587,6 +4609,8 @@ func BaseTestAll(engine *xorm.Engine, t *testing.T) {
 	directCreateTable(engine, t)
 	fmt.Println("-------------- insert --------------")
 	insert(engine, t)
+	fmt.Println("-------------- testInsertDefault --------------")
+	testInsertDefault(engine, t)
 	fmt.Println("-------------- insertAutoIncr --------------")
 	insertAutoIncr(engine, t)
 	fmt.Println("-------------- insertMulti --------------")

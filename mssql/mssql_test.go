@@ -1,14 +1,10 @@
 package tests
 
-//
-// +build windows
-
 import (
 	"database/sql"
 	"runtime"
 	"testing"
 
-	. ".."
 	"github.com/go-xorm/xorm"
 	_ "github.com/lunny/godbc"
 )
