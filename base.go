@@ -2880,6 +2880,10 @@ type TTime struct {
 	Tz time.Time `xorm:"timestampz"`
 }
 
+func (t *TTime) String() string {
+	return fmt.Sprintf("%v|T:%v|Tz:%v", t.Id, t.T, t.Tz)
+}
+
 func testTime(engine *xorm.Engine, t *testing.T) {
 	err := engine.Sync(&TTime{})
 	if err != nil {
@@ -2888,14 +2892,20 @@ func testTime(engine *xorm.Engine, t *testing.T) {
 	}
 
 	tt := &TTime{}
+
+	println("b4 Insert tt:", tt.String())
 	_, err = engine.Insert(tt)
+
+	println("after Insert tt:", tt.String())
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
 	tt2 := &TTime{Id: tt.Id}
+	println("b4 Get tt2:", tt2.String())
 	has, err := engine.Get(tt2)
+	println("after Get tt2:", tt2.String())
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -2907,14 +2917,18 @@ func testTime(engine *xorm.Engine, t *testing.T) {
 	}
 
 	tt3 := &TTime{T: time.Now(), Tz: time.Now()}
+	println("b4 Insert tt3:", tt3.String())
 	_, err = engine.Insert(tt3)
+	println("after Insert tt3:", tt3.String())
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
 	tt4s := make([]TTime, 0)
+	println("b4 Insert tt4s:", tt4s)
 	err = engine.Find(&tt4s)
+	println("after Insert tt4s:", tt4s)
 	if err != nil {
 		t.Error(err)
 		panic(err)
