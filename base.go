@@ -348,6 +348,11 @@ type UpdateMustCols struct {
 	String string
 }
 
+type UpdateIncr struct {
+	Id  int64
+	Cnt int
+}
+
 func update(engine *xorm.Engine, t *testing.T) {
 	// update by id
 	user := Userinfo{Username: "xxx", Height: 1.2}
@@ -530,10 +535,6 @@ func update(engine *xorm.Engine, t *testing.T) {
 	}
 
 	{
-		type UpdateIncr struct {
-			Id  int64
-			Cnt int
-		}
 
 		col1 := &UpdateIncr{}
 		err = engine.Sync(col1)
@@ -759,10 +760,6 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 	}
 
 	{
-		type UpdateIncr struct {
-			Id  int64
-			Cnt int
-		}
 
 		col1 := &UpdateIncr{}
 		err = engine.Sync(col1)
