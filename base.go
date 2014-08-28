@@ -2583,6 +2583,48 @@ func testStringPK(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
+type CacheDomain struct {
+	Id   int64 `xorm:"pk cache"`
+	Name string
+}
+
+func testCacheDomain(engine *xorm.Engine, t *testing.T) {
+
+	err := engine.CreateTables(&CacheDomain{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	table := engine.AutoMap(&CacheDomain{})
+	if table.Cacher == nil {
+		err = fmt.Errorf("table cache is nil")
+		t.Error(err)
+		panic(err)
+	}
+}
+
+type NoCacheDomain struct {
+	Id   int64 `xorm:"pk nocache"`
+	Name string
+}
+
+func testNoCacheDomain(engine *xorm.Engine, t *testing.T) {
+
+	err := engine.CreateTables(&NoCacheDomain{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	table := engine.AutoMap(&NoCacheDomain{})
+	if table.Cacher != nil {
+		err = fmt.Errorf("table cache exist")
+		t.Error(err)
+		panic(err)
+	}
+}
+
 func testMetaInfo(engine *xorm.Engine, t *testing.T) {
 	tables, err := engine.DBMetas()
 	if err != nil {
@@ -4712,6 +4754,8 @@ func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
 	testProcessors(engine, t)
 	fmt.Println("-------------- transaction --------------")
 	transaction(engine, t)
+	fmt.Println("-------------- testCacheDomain --------------")
+	testCacheDomain(engine, t)
 }
 
 // !nash! the 3rd set of the test is intended for non-cache enabled engine
@@ -4728,6 +4772,8 @@ func BaseTestAll3(engine *xorm.Engine, t *testing.T) {
 	testCompositeKey2(engine, t)
 	fmt.Println("-------------- testStringPK --------------")
 	testStringPK(engine, t)
+	fmt.Println("-------------- testNoCacheDomain --------------")
+	testNoCacheDomain(engine, t)
 }
 
 func BaseTestAllSnakeMapper(engine *xorm.Engine, t *testing.T) {
