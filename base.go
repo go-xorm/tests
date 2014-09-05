@@ -2596,7 +2596,7 @@ func testCacheDomain(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	table := engine.AutoMap(&CacheDomain{})
+	table := engine.TableInfo(&CacheDomain{})
 	if table.Cacher == nil {
 		err = fmt.Errorf("table cache is nil")
 		t.Error(err)
@@ -2617,7 +2617,7 @@ func testNoCacheDomain(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	table := engine.AutoMap(&NoCacheDomain{})
+	table := engine.TableInfo(&NoCacheDomain{})
 	if table.Cacher != nil {
 		err = fmt.Errorf("table cache exist")
 		t.Error(err)
