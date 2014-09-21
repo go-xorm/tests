@@ -75,6 +75,20 @@ func NewCacher() core.Cacher {
 	return xorm.NewLRUCacher2(xorm.NewMemoryStore(), time.Hour, 10000)
 }
 
+func GetEnvOk(k string) (v string, ok bool) {
+	v = os.Getenv(k)
+	if v != "" {
+		return v, true
+	}
+	keq := k + "="
+	for _, kv := range os.Environ() {
+		if kv == keq {
+			return "", true
+		}
+	}
+	return "", false
+}
+
 func directCreateTable(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(&Userinfo{}, &Userdetail{}, &Numeric{})
 	if err != nil {
@@ -931,7 +945,7 @@ func find(engine *xorm.Engine, t *testing.T) {
 
 	users2 := make([]Userinfo, 0)
 	userinfo := engine.TableMapper.Obj2Table("Userinfo")
-	err = engine.Sql("select * from " + engine.Quote(userinfo)).Find(&users2)
+	err = engine.Sql("select * from " + userinfo).Find(&users2)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -1648,7 +1662,7 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 	}
 
 	var info UserAndDetail
-	qt := engine.Quote
+	qt := engine.Dialect().CheckedQuote
 	engine.Update(&Userinfo{Detail: Userdetail{Id: 1}})
 	ui := engine.TableMapper.Obj2Table("Userinfo")
 	ud := engine.TableMapper.Obj2Table("Userdetail")
