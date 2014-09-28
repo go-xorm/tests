@@ -196,7 +196,7 @@ func exec(engine *xorm.Engine, t *testing.T) {
 }
 
 func testQuerySameMapper(engine *xorm.Engine, t *testing.T) {
-	sql := "select * from `Userinfo`"
+	sql := "select * from Userinfo"
 	results, err := engine.Query(sql)
 	if err != nil {
 		t.Error(err)
@@ -206,7 +206,7 @@ func testQuerySameMapper(engine *xorm.Engine, t *testing.T) {
 }
 
 func execSameMapper(engine *xorm.Engine, t *testing.T) {
-	sql := "update `Userinfo` set `Username`=? where (id)=?"
+	sql := "update Userinfo set Username=? where (id)=?"
 	res, err := engine.Exec(sql, "xiaolun", 1)
 	if err != nil {
 		t.Error(err)
@@ -1056,7 +1056,7 @@ func in(engine *xorm.Engine, t *testing.T) {
 	users = make([]Userinfo, 0)
 	ids := []interface{}{7, 8, 9}
 	department := engine.ColumnMapper.Obj2Table("Departname")
-	err = engine.Where("`"+department+"` = ?", "dev").In("(id)", ids...).Find(&users)
+	err = engine.Where(engine.Dialect().CheckedQuote(department)+"=?", "dev").In("(id)", ids...).Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)

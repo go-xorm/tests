@@ -24,7 +24,7 @@ func newPostgresEngine() (*xorm.Engine, error) {
 		return nil, err
 	}
 	for _, table := range tables {
-		_, err = orm.Exec("drop table \"" + table.Name + "\"")
+		_, err = orm.Exec("DROP TABLE \"" + table.Name + "\"")
 		if err != nil {
 			return nil, err
 		}
