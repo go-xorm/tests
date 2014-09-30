@@ -788,7 +788,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 
-		cnt, err := engine.Id(col1.Id).Incr("`Cnt`").Update(col1)
+		cnt, err := engine.Id(col1.Id).Incr(engine.Dialect().CheckedQuote("Cnt")).Update(col1)
 		if err != nil {
 			t.Error(err)
 			panic(err)
@@ -1205,7 +1205,7 @@ func orderSameMapper(engine *xorm.Engine, t *testing.T) {
 
 func joinSameMapper(engine *xorm.Engine, t *testing.T) {
 	users := make([]Userinfo, 0)
-	err := engine.Join("LEFT", "`Userdetail`", "`Userinfo`.`(id)`=`Userdetail`.`Id`").Find(&users)
+	err := engine.Join("LEFT", "Userdetail", "Userinfo.(id)=Userdetail.Id").Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -1214,7 +1214,7 @@ func joinSameMapper(engine *xorm.Engine, t *testing.T) {
 
 func havingSameMapper(engine *xorm.Engine, t *testing.T) {
 	users := make([]Userinfo, 0)
-	err := engine.GroupBy("Username").Having(`"Username"='xlw'`).Find(&users)
+	err := engine.GroupBy("Username").Having(`Username='xlw'`).Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -1358,7 +1358,7 @@ func combineTransactionSameMapper(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	_, err = session.Exec("delete from `Userinfo` where `Username` = ?", user2.Username)
+	_, err = session.Exec("delete from Userinfo where Username=?", user2.Username)
 	if err != nil {
 		session.Rollback()
 		t.Error(err)
