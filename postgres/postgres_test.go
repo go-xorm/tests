@@ -50,6 +50,7 @@ func TestPostgres(t *testing.T) {
 	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
+	UserTest1(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
 	BaseTestAll2(engine, t)
 	BaseTestAll3(engine, t)
