@@ -399,7 +399,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 		return
 	}
 
-	err = engine.Sync(&Article{})
+	err = engine.StoreEngine("Innodb").Sync2(&Article{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
