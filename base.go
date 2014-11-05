@@ -2625,81 +2625,81 @@ func testNoCacheDomain(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
-type SoftDelete struct {
+type Deleted struct {
 	Id        int64 `xorm:"pk"`
 	Name      string
-	DeletedAt time.Time `xorm:"softdelete"`
+	DeletedAt time.Time `xorm:"deleted"`
 }
 
-func testSoftDelete(engine *xorm.Engine, t *testing.T) {
-	err := engine.CreateTables(&SoftDelete{})
+func testDeleted(engine *xorm.Engine, t *testing.T) {
+	err := engine.CreateTables(&Deleted{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
-	//table := engine.TableInfo(&SoftDelete{})
+	//table := engine.TableInfo(&Deleted{})
 
-	engine.InsertOne(&SoftDelete{Id: 1, Name: "11111"})
-	engine.InsertOne(&SoftDelete{Id: 2, Name: "22222"})
-	engine.InsertOne(&SoftDelete{Id: 3, Name: "33333"})
+	engine.InsertOne(&Deleted{Id: 1, Name: "11111"})
+	engine.InsertOne(&Deleted{Id: 2, Name: "22222"})
+	engine.InsertOne(&Deleted{Id: 3, Name: "33333"})
 
 	// Test normal Find()
-	var records1 []SoftDelete
-	err = engine.Where("id > 0").Find(&records1, &SoftDelete{})
+	var records1 []Deleted
+	err = engine.Where("id > 0").Find(&records1, &Deleted{})
 	if len(records1) != 3 {
 		t.Fatalf("Find failed: expected=%d, actual=%d, err=%v", 3, len(records1), err)
 	}
 
 	// Test normal Get()
-	record1 := &SoftDelete{}
+	record1 := &Deleted{}
 	has, err := engine.Id(1).Get(record1)
 	if !has {
 		t.Fatalf("Get failed: expected=%v, actual=%v, err=%v", true, has, err)
 	}
-	//fmt.Println("----- get:", softDelete1)
+	//fmt.Println("----- get:", record1)
 
-	// Test Delete() with softdelete
-	affected, err := engine.Id(1).Delete(&SoftDelete{})
+	// Test Delete() with deleted
+	affected, err := engine.Id(1).Delete(&Deleted{})
 	if affected != 1 {
 		t.Fatalf("Delete failed: expected=%v, actual=%v, err=%v", 1, affected, err)
 	}
-	has, err = engine.Id(1).Get(&SoftDelete{})
+	has, err = engine.Id(1).Get(&Deleted{})
 	if has {
 		t.Fatalf("Delete failed. Must not get any records.")
 	}
 
 	// Test no rows affected after Delete() again.
-	affected, err = engine.Id(1).Delete(&SoftDelete{})
+	affected, err = engine.Id(1).Delete(&Deleted{})
 	if affected != 0 {
 		t.Fatalf("Delete failed. No rows must be affected: expected=%v, actual=%v, err=%v", 0, affected, err)
 	}
 
-	// SoftDelete.DeletedAt must not be updated.
-	affected, err = engine.Id(2).Update(&SoftDelete{Name: "2", DeletedAt: time.Now()})
+	// Deleted.DeletedAt must not be updated.
+	affected, err = engine.Id(2).Update(&Deleted{Name: "2", DeletedAt: time.Now()})
 	if affected != 1 {
 		t.Fatalf("Update failed: expected=%v, actual=%v, err=%v", 1, affected, err)
 	}
-	record2 := &SoftDelete{}
+	record2 := &Deleted{}
 	has, err = engine.Id(2).Get(record2)
 	if !record2.DeletedAt.IsZero() {
 		t.Fatalf("Update failed: DeletedAt must be zero value. actual=%v", record2.DeletedAt)
 	}
 
-	// Test find all records whatever soft deleted.
-	var unscopedRecords1 []SoftDelete
-	err = engine.Unscoped().Where("id > 0").Find(&unscopedRecords1, &SoftDelete{})
+	// Test find all records whatever `deleted`.
+	var unscopedRecords1 []Deleted
+	err = engine.Unscoped().Where("id > 0").Find(&unscopedRecords1, &Deleted{})
 	if len(unscopedRecords1) != 3 {
 		t.Fatalf("Find failed: all records must be selected when engine.Unscoped()")
 	}
 
 	// Delete() must really delete a record with Unscoped()
-	affected, err = engine.Unscoped().Id(1).Delete(&SoftDelete{})
+	affected, err = engine.Unscoped().Id(1).Delete(&Deleted{})
 	if affected != 1 {
 		t.Fatalf("Delete failed")
 	}
-	var unscopedRecords2 []SoftDelete
-	err = engine.Unscoped().Where("id > 0").Find(&unscopedRecords2, &SoftDelete{})
+	var unscopedRecords2 []Deleted
+	err = engine.Unscoped().Where("id > 0").Find(&unscopedRecords2, &Deleted{})
 	if len(unscopedRecords2) != 2 {
 		t.Fatalf("Find failed: Only 2 records must be selected when engine.Unscoped()")
 	}
@@ -4898,8 +4898,8 @@ func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
 	transaction(engine, t)
 	fmt.Println("-------------- testCacheDomain --------------")
 	testCacheDomain(engine, t)
-	fmt.Println("-------------- testSoftDelete --------------")
-	testSoftDelete(engine, t)
+	fmt.Println("-------------- testDeleted --------------")
+	testDeleted(engine, t)
 }
 
 // !nash! the 3rd set of the test is intended for non-cache enabled engine
