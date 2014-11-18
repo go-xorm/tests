@@ -2668,6 +2668,11 @@ func testDeleted(engine *xorm.Engine, t *testing.T) {
 	if has {
 		t.Fatalf("Delete failed. Must not get any records.")
 	}
+	var records2 []Deleted
+	err = engine.Where("id > 0").Find(&records2)
+	if len(records2) != 2 {
+		t.Fatalf("Find() failed.")
+	}
 
 	// Test no rows affected after Delete() again.
 	affected, err = engine.Id(1).Delete(&Deleted{})
@@ -2690,6 +2695,7 @@ func testDeleted(engine *xorm.Engine, t *testing.T) {
 	var unscopedRecords1 []Deleted
 	err = engine.Unscoped().Where("id > 0").Find(&unscopedRecords1, &Deleted{})
 	if len(unscopedRecords1) != 3 {
+		fmt.Printf("unscopedRecords1 = %v\n", unscopedRecords1)
 		t.Fatalf("Find failed: all records must be selected when engine.Unscoped()")
 	}
 
