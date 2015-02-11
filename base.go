@@ -1219,6 +1219,7 @@ func transaction(engine *xorm.Engine, t *testing.T) {
 
 	counter()
 	defer counter()
+
 	session := engine.NewSession()
 	defer session.Close()
 
@@ -1226,6 +1227,7 @@ func transaction(engine *xorm.Engine, t *testing.T) {
 	if err != nil {
 		t.Error(err)
 		panic(err)
+		return
 	}
 
 	user1 := Userinfo{Username: "xiaoxiao", Departname: "dev", Alias: "lunny", Created: time.Now()}
@@ -1251,12 +1253,14 @@ func transaction(engine *xorm.Engine, t *testing.T) {
 		session.Rollback()
 		t.Error(err)
 		panic(err)
+		return
 	}
 
 	err = session.Commit()
 	if err != nil {
 		t.Error(err)
 		panic(err)
+		return
 	}
 	// panic(err) !nashtsai! should remove this
 }
@@ -1328,21 +1332,25 @@ func combineTransactionSameMapper(engine *xorm.Engine, t *testing.T) {
 	if err != nil {
 		t.Error(err)
 		panic(err)
+		return
 	}
-	//session.IsAutoRollback = false
+
 	user1 := Userinfo{Username: "xiaoxiao2", Departname: "dev", Alias: "lunny", Created: time.Now()}
 	_, err = session.Insert(&user1)
 	if err != nil {
 		session.Rollback()
 		t.Error(err)
 		panic(err)
+		return
 	}
+
 	user2 := Userinfo{Username: "zzz"}
 	_, err = session.Where("(id) = ?", 0).Update(&user2)
 	if err != nil {
 		session.Rollback()
 		t.Error(err)
 		panic(err)
+		return
 	}
 
 	_, err = session.Exec("delete from `Userinfo` where `Username` = ?", user2.Username)
@@ -1350,6 +1358,7 @@ func combineTransactionSameMapper(engine *xorm.Engine, t *testing.T) {
 		session.Rollback()
 		t.Error(err)
 		panic(err)
+		return
 	}
 
 	err = session.Commit()
@@ -2268,6 +2277,18 @@ func testIntId(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
+	beans2 := make(map[int]IntId)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
 	cnt, err = engine.Id(bean.Id).Delete(&IntId{})
 	if err != nil {
 		t.Error(err)
@@ -2324,6 +2345,18 @@ func testInt32Id(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 	if len(beans) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	beans2 := make(map[int32]Int32Id, 0)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
 		err = errors.New("get count should be one")
 		t.Error(err)
 		panic(err)
@@ -2389,6 +2422,18 @@ func testUintId(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
+	beans2 := make(map[uint]UintId, 0)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
 	cnt, err = engine.Id(bean.Id).Delete(&UintId{})
 	if err != nil {
 		t.Error(err)
@@ -2445,6 +2490,18 @@ func testUint32Id(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 	if len(beans) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	beans2 := make(map[uint32]Uint32Id, 0)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
 		err = errors.New("get count should be one")
 		t.Error(err)
 		panic(err)
@@ -2520,6 +2577,22 @@ func testUint64Id(engine *xorm.Engine, t *testing.T) {
 		panic(errors.New("should be equal"))
 	}
 
+	beans2 := make(map[uint64]Uint64Id, 0)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	if *bean != beans2[bean.Id] {
+		panic(errors.New("should be equal"))
+	}
+
 	cnt, err = engine.Id(bean.Id).Delete(&Uint64Id{})
 	if err != nil {
 		t.Error(err)
@@ -2576,6 +2649,18 @@ func testStringPK(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 	if len(beans) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	beans2 := make(map[string]StringPK)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
 		err = errors.New("get count should be one")
 		t.Error(err)
 		panic(err)
@@ -3065,34 +3150,38 @@ func testTime(engine *xorm.Engine, t *testing.T) {
 }
 
 func testPrefixTableName(engine *xorm.Engine, t *testing.T) {
-	tempEngine, err := engine.Clone()
+	/*tempEngine, err := xorm.NewEngine(engine.DriverName(), engine.DataSourceName())
+	//tempEngine, err := engine.Clone()
 	if err != nil {
 		t.Error(err)
 		panic(err)
+		return
 	}
-	//defer tempEngine.Close()
+	defer tempEngine.Close()
 
 	tempEngine.ShowSQL = true
 	mapper := core.NewPrefixMapper(core.SnakeMapper{}, "xlw_")
-	//tempEngine.SetMapper(mapper)
 	tempEngine.SetTableMapper(mapper)
 	exist, err := tempEngine.IsTableExist(&Userinfo{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
+		return
 	}
 	if exist {
 		err = tempEngine.DropTables(&Userinfo{})
 		if err != nil {
 			t.Error(err)
 			panic(err)
+			return
 		}
 	}
+
 	err = tempEngine.CreateTables(&Userinfo{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
-	}
+	}*/
 }
 
 type CreatedUpdated struct {
