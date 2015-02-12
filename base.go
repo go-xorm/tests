@@ -88,6 +88,29 @@ func directCreateTable(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
+	isEmpty, err := engine.IsTableEmpty(&Userinfo{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !isEmpty {
+		err = errors.New("userinfo should empty")
+		t.Error(err)
+		panic(err)
+	}
+
+	tbName := engine.TableMapper.Obj2Table("Userinfo")
+	isEmpty, err = engine.IsTableEmpty(tbName)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !isEmpty {
+		err = errors.New("userinfo should empty")
+		t.Error(err)
+		panic(err)
+	}
+
 	err = engine.DropTables(&Userinfo{}, &Userdetail{}, new(Numeric))
 	if err != nil {
 		t.Error(err)
