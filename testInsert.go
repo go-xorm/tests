@@ -123,6 +123,11 @@ type CreatedInsert4 struct {
 	Created int `xorm:"created"`
 }
 
+type CreatedInsert5 struct {
+	Id      int64
+	Created time.Time `xorm:"created bigint"`
+}
+
 func testInsertCreated(engine *xorm.Engine, t *testing.T) {
 	di := new(CreatedInsert)
 	err := engine.Sync2(di)
