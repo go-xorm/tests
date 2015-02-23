@@ -132,79 +132,114 @@ func testInsertCreated(engine *xorm.Engine, t *testing.T) {
 	di := new(CreatedInsert)
 	err := engine.Sync2(di)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	ci := &CreatedInsert{}
 	_, err = engine.Insert(ci)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	has, err := engine.Desc("(id)").Get(di)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if !has {
-		t.Error(xorm.ErrNotExist)
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci.Created.Unix() != di.Created.Unix() {
+		t.Fatal("should equal:", ci, di)
 	}
 	fmt.Println("ci:", ci, "di:", di)
 
 	di2 := new(CreatedInsert2)
 	err = engine.Sync2(di2)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	ci2 := &CreatedInsert2{}
 	_, err = engine.Insert(ci2)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	has, err = engine.Desc("(id)").Get(di2)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if !has {
-		t.Error(xorm.ErrNotExist)
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci2.Created != di2.Created {
+		t.Fatal("should equal:", ci2, di2)
 	}
 	fmt.Println("ci2:", ci2, "di2:", di2)
 
 	di3 := new(CreatedInsert3)
 	err = engine.Sync2(di3)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	ci3 := &CreatedInsert3{}
 	_, err = engine.Insert(ci3)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	has, err = engine.Desc("(id)").Get(di3)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if !has {
-		t.Error(xorm.ErrNotExist)
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci3.Created != di3.Created {
+		t.Fatal("should equal:", ci3, di3)
 	}
 	fmt.Println("ci3:", ci3, "di3:", di3)
 
 	di4 := new(CreatedInsert4)
 	err = engine.Sync2(di4)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	ci4 := &CreatedInsert4{}
 	_, err = engine.Insert(ci4)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	has, err = engine.Desc("(id)").Get(di4)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if !has {
-		t.Error(xorm.ErrNotExist)
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci4.Created != di4.Created {
+		t.Fatal("should equal:", ci4, di4)
 	}
 	fmt.Println("ci4:", ci4, "di4:", di4)
+
+	di5 := new(CreatedInsert5)
+	err = engine.Sync2(di5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ci5 := &CreatedInsert5{}
+	_, err = engine.Insert(ci5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	has, err = engine.Desc("(id)").Get(di5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !has {
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci5.Created.Unix() != di5.Created.Unix() {
+		t.Fatal("should equal:", ci5, di5)
+	}
+	fmt.Println("ci5:", ci5, "di5:", di5)
+
 }
 
 func insertMulti(engine *xorm.Engine, t *testing.T) {
