@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/go-xorm/xorm"
 )
@@ -252,6 +253,176 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 	}
+
+	testUpdateUpdated(engine, t)
+}
+
+type UpdatedUpdate struct {
+	Id      int64
+	Updated time.Time `xorm:"updated"`
+}
+
+type UpdatedUpdate2 struct {
+	Id      int64
+	Updated int64 `xorm:"updated"`
+}
+
+type UpdatedUpdate3 struct {
+	Id      int64
+	Updated int `xorm:"updated bigint"`
+}
+
+type UpdatedUpdate4 struct {
+	Id      int64
+	Updated int `xorm:"updated"`
+}
+
+type UpdatedUpdate5 struct {
+	Id      int64
+	Updated time.Time `xorm:"updated bigint"`
+}
+
+func testUpdateUpdated(engine *xorm.Engine, t *testing.T) {
+	di := new(UpdatedUpdate)
+	err := engine.Sync2(di)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = engine.Insert(&UpdatedUpdate{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ci := &UpdatedUpdate{}
+	_, err = engine.Id(1).Update(ci)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	has, err := engine.Id(1).Get(di)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !has {
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci.Updated.Unix() != di.Updated.Unix() {
+		t.Fatal("should equal:", ci, di)
+	}
+	fmt.Println("ci:", ci, "di:", di)
+
+	di2 := new(UpdatedUpdate2)
+	err = engine.Sync2(di2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = engine.Insert(&UpdatedUpdate2{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ci2 := &UpdatedUpdate2{}
+	_, err = engine.Id(1).Update(ci2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	has, err = engine.Id(1).Get(di2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !has {
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci2.Updated != di2.Updated {
+		t.Fatal("should equal:", ci2, di2)
+	}
+	fmt.Println("ci2:", ci2, "di2:", di2)
+
+	di3 := new(UpdatedUpdate3)
+	err = engine.Sync2(di3)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = engine.Insert(&UpdatedUpdate3{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ci3 := &UpdatedUpdate3{}
+	_, err = engine.Id(1).Update(ci3)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	has, err = engine.Id(1).Get(di3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !has {
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci3.Updated != di3.Updated {
+		t.Fatal("should equal:", ci3, di3)
+	}
+	fmt.Println("ci3:", ci3, "di3:", di3)
+
+	di4 := new(UpdatedUpdate4)
+	err = engine.Sync2(di4)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = engine.Insert(&UpdatedUpdate4{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ci4 := &UpdatedUpdate4{}
+	_, err = engine.Id(1).Update(ci4)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	has, err = engine.Id(1).Get(di4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !has {
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci4.Updated != di4.Updated {
+		t.Fatal("should equal:", ci4, di4)
+	}
+	fmt.Println("ci4:", ci4, "di4:", di4)
+
+	di5 := new(UpdatedUpdate5)
+	err = engine.Sync2(di5)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = engine.Insert(&UpdatedUpdate5{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ci5 := &UpdatedUpdate5{}
+	_, err = engine.Id(1).Update(ci5)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	has, err = engine.Id(1).Get(di5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !has {
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci5.Updated.Unix() != di5.Updated.Unix() {
+		t.Fatal("should equal:", ci5, di5)
+	}
+	fmt.Println("ci5:", ci5, "di5:", di5)
 }
 
 func updateSameMapper(engine *xorm.Engine, t *testing.T) {
