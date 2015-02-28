@@ -72,6 +72,7 @@ type DefaultInsert struct {
 	Id      int64
 	Status  int `xorm:"default -1"`
 	Name    string
+	Created time.Time `xorm:"created"`
 	Updated time.Time `xorm:"updated"`
 }
 
@@ -82,7 +83,8 @@ func testInsertDefault(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = engine.Omit(engine.ColumnMapper.Obj2Table("Status")).Insert(&DefaultInsert{Name: "test"})
+	var di2 = DefaultInsert{Name: "test"}
+	_, err = engine.Omit(engine.ColumnMapper.Obj2Table("Status")).Insert(&di2)
 	if err != nil {
 		t.Error(err)
 	}
@@ -99,6 +101,16 @@ func testInsertDefault(engine *xorm.Engine, t *testing.T) {
 	if di.Status != -1 {
 		err = errors.New("inserted error data")
 		t.Error(err)
+		panic(err)
+	}
+	if di2.Updated.Unix() != di.Updated.Unix() {
+		err = errors.New("updated should equal")
+		t.Error(err, di.Updated, di2.Updated)
+		panic(err)
+	}
+	if di2.Created.Unix() != di.Created.Unix() {
+		err = errors.New("created should equal")
+		t.Error(err, di.Created, di2.Created)
 		panic(err)
 	}
 }
