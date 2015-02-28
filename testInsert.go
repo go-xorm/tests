@@ -45,6 +45,7 @@ func insert(engine *xorm.Engine, t *testing.T) {
 	}
 
 	testInsertCreated(engine, t)
+	testCreatedJsonTime(engine, t)
 }
 
 func insertAutoIncr(engine *xorm.Engine, t *testing.T) {
@@ -251,7 +252,54 @@ func testInsertCreated(engine *xorm.Engine, t *testing.T) {
 		t.Fatal("should equal:", ci5, di5)
 	}
 	fmt.Println("ci5:", ci5, "di5:", di5)
+}
 
+type JsonTime time.Time
+
+func (j JsonTime) format() string {
+	t := time.Time(j)
+	if t.IsZero() {
+		return ""
+	}
+
+	return t.Format("2006-01-02")
+}
+
+func (j JsonTime) MarshalText() ([]byte, error) {
+	return []byte(j.format()), nil
+}
+
+func (j JsonTime) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + j.format() + `"`), nil
+}
+
+type MyJsonTime struct {
+	Id      int64    `json:"id"`
+	Created JsonTime `xorm:"created" json:"created_at"`
+}
+
+func testCreatedJsonTime(engine *xorm.Engine, t *testing.T) {
+	di5 := new(MyJsonTime)
+	err := engine.Sync2(di5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ci5 := &MyJsonTime{}
+	_, err = engine.Insert(ci5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	has, err := engine.Desc("(id)").Get(di5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !has {
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if time.Time(ci5.Created).Unix() != time.Time(di5.Created).Unix() {
+		t.Fatal("should equal:", time.Time(ci5.Created).Unix(), time.Time(di5.Created).Unix())
+	}
+	fmt.Println("ci5:", ci5, "di5:", di5)
 }
 
 func insertMulti(engine *xorm.Engine, t *testing.T) {
