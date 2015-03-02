@@ -649,3 +649,83 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 		}
 	}
 }
+
+func testUseBool(engine *xorm.Engine, t *testing.T) {
+	cnt1, err := engine.Count(&Userinfo{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	users := make([]Userinfo, 0)
+	err = engine.Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	var fNumber int64
+	for _, u := range users {
+		if u.IsMan == false {
+			fNumber += 1
+		}
+	}
+
+	cnt2, err := engine.UseBool().Update(&Userinfo{IsMan: true})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if fNumber != cnt2 {
+		fmt.Println("cnt1", cnt1, "fNumber", fNumber, "cnt2", cnt2)
+		/*err = errors.New("Updated number is not corrected.")
+		  t.Error(err)
+		  panic(err)*/
+	}
+
+	_, err = engine.Update(&Userinfo{IsMan: true})
+	if err == nil {
+		err = errors.New("error condition")
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testBool(engine *xorm.Engine, t *testing.T) {
+	_, err := engine.UseBool().Update(&Userinfo{IsMan: true})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	users := make([]Userinfo, 0)
+	err = engine.Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	for _, user := range users {
+		if !user.IsMan {
+			err = errors.New("update bool or find bool error")
+			t.Error(err)
+			panic(err)
+		}
+	}
+
+	_, err = engine.UseBool().Update(&Userinfo{IsMan: false})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	users = make([]Userinfo, 0)
+	err = engine.Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	for _, user := range users {
+		if user.IsMan {
+			err = errors.New("update bool or find bool error")
+			t.Error(err)
+			panic(err)
+		}
+	}
+}

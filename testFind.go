@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -65,4 +66,36 @@ func findMap2(engine *xorm.Engine, t *testing.T) {
 	for id, user := range users {
 		fmt.Println(id, user)
 	}
+}
+
+func testDistinct(engine *xorm.Engine, t *testing.T) {
+	users := make([]Userinfo, 0)
+	departname := engine.TableMapper.Obj2Table("Departname")
+	err := engine.Distinct(departname).Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(users) != 1 {
+		t.Error(err)
+		panic(errors.New("should be one record"))
+	}
+
+	fmt.Println(users)
+
+	type Depart struct {
+		Departname string
+	}
+
+	users2 := make([]Depart, 0)
+	err = engine.Distinct(departname).Table(new(Userinfo)).Find(&users2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(users2) != 1 {
+		t.Error(err)
+		panic(errors.New("should be one record"))
+	}
+	fmt.Println(users2)
 }
