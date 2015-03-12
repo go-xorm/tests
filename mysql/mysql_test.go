@@ -23,11 +23,12 @@ func TestMysql(t *testing.T) {
 	}
 
 	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test?charset=utf8")
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	defer engine.Close()
+
 	engine.ShowSQL = ShowTestSql
 	engine.ShowErr = ShowTestSql
 	engine.ShowWarn = ShowTestSql
@@ -47,11 +48,12 @@ func TestMysqlSameMapper(t *testing.T) {
 	}
 
 	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test1?charset=utf8")
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	defer engine.Close()
+
 	engine.ShowSQL = ShowTestSql
 	engine.ShowErr = ShowTestSql
 	engine.ShowWarn = ShowTestSql
@@ -64,6 +66,32 @@ func TestMysqlSameMapper(t *testing.T) {
 	BaseTestAll3(engine, t)
 }
 
+func TestMysqlGonicMapper(t *testing.T) {
+	err := mysqlDdlImport()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test1?charset=utf8")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer engine.Close()
+
+	engine.ShowSQL = ShowTestSql
+	engine.ShowErr = ShowTestSql
+	engine.ShowWarn = ShowTestSql
+	engine.ShowDebug = ShowTestSql
+	engine.SetMapper(core.GonicMapper{})
+
+	BaseTestAll(engine, t)
+	//BaseTestAllSameMapper(engine, t)
+	BaseTestAll2(engine, t)
+	BaseTestAll3(engine, t)
+}
+
 func TestMysqlWithCache(t *testing.T) {
 	err := mysqlDdlImport()
 	if err != nil {
@@ -72,11 +100,12 @@ func TestMysqlWithCache(t *testing.T) {
 	}
 
 	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test2?charset=utf8")
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	defer engine.Close()
+
 	engine.SetDefaultCacher(NewCacher())
 	engine.ShowSQL = ShowTestSql
 	engine.ShowErr = ShowTestSql
@@ -96,11 +125,12 @@ func TestMysqlWithCacheSameMapper(t *testing.T) {
 	}
 
 	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test3?charset=utf8")
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	defer engine.Close()
+
 	engine.SetMapper(core.SameMapper{})
 	engine.SetDefaultCacher(NewCacher())
 	engine.ShowSQL = ShowTestSql
@@ -122,6 +152,7 @@ func mysqlDdlImport() error {
 	if err != nil {
 		return err
 	}
+
 	engine.ShowSQL = ShowTestSql
 	engine.ShowErr = ShowTestSql
 	engine.ShowWarn = ShowTestSql
