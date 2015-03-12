@@ -239,7 +239,6 @@ func testInsertCreated(engine *xorm.Engine, t *testing.T) {
 		t.Fatal("should equal:", ci5, di5)
 	}
 	fmt.Println("ci5:", ci5, "di5:", di5)
-
 }
 
 func insertMulti(engine *xorm.Engine, t *testing.T) {

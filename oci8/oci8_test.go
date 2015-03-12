@@ -10,7 +10,7 @@ import (
 	_ "github.com/mattn/go-oci8"
 )
 
-var connStr string = "system/oracle@192.168.59.103:49161/xe"
+var connStr string = "anonymous/123456@192.168.59.103:49161/xe"
 
 func newOci8Engine() (*xorm.Engine, error) {
 	orm, err := xorm.NewEngine("oci8", connStr)
