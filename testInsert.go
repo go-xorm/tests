@@ -300,6 +300,12 @@ func testCreatedJsonTime(engine *xorm.Engine, t *testing.T) {
 		t.Fatal("should equal:", time.Time(ci5.Created).Unix(), time.Time(di5.Created).Unix())
 	}
 	fmt.Println("ci5:", ci5, "di5:", di5)
+
+	var dis = make([]MyJsonTime, 0)
+	err = engine.Find(&dis)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func insertMulti(engine *xorm.Engine, t *testing.T) {
