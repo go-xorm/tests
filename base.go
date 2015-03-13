@@ -326,6 +326,14 @@ func having(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(users)
+
+	/*users = make([]Userinfo, 0)
+	err = engine.Cols("id, username").GroupBy("username").Having("username='xlw'").Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(users)*/
 }
 
 func orderSameMapper(engine *xorm.Engine, t *testing.T) {
