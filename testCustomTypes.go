@@ -309,14 +309,15 @@ func testCustomType2(engine *xorm.Engine, t *testing.T) {
 	fmt.Println(user)
 
 	users := make([]UserCus, 0)
-	err = engine.Where("status = ?", "Registed").Find(&users)
+	err = engine.Where("`"+engine.ColumnMapper.Obj2Table("Status")+"` = ?", "Registed").Find(&users)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
+		panic(err)
 	}
 	if len(users) != 1 {
-		t.Fatal("users should has 1 record.")
+		t.Error("users should has 1 record.")
+		panic("")
 	}
 
 	fmt.Println(users)
-
 }

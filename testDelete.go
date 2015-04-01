@@ -60,7 +60,7 @@ func testDeleted(engine *xorm.Engine, t *testing.T) {
 
 	// Test normal Find()
 	var records1 []Deleted
-	err = engine.Where("id > 0").Find(&records1, &Deleted{})
+	err = engine.Where("`"+engine.ColumnMapper.Obj2Table("Id")+"` > 0").Find(&records1, &Deleted{})
 	if len(records1) != 3 {
 		t.Fatalf("Find failed: expected=%d, actual=%d, err=%v", 3, len(records1), err)
 	}
@@ -83,7 +83,7 @@ func testDeleted(engine *xorm.Engine, t *testing.T) {
 		t.Fatalf("Delete failed. Must not get any records.")
 	}
 	var records2 []Deleted
-	err = engine.Where("id > 0").Find(&records2)
+	err = engine.Where("`"+engine.ColumnMapper.Obj2Table("Id")+"` > 0").Find(&records2)
 	if len(records2) != 2 {
 		t.Fatalf("Find() failed.")
 	}
@@ -107,7 +107,7 @@ func testDeleted(engine *xorm.Engine, t *testing.T) {
 
 	// Test find all records whatever `deleted`.
 	var unscopedRecords1 []Deleted
-	err = engine.Unscoped().Where("id > 0").Find(&unscopedRecords1, &Deleted{})
+	err = engine.Unscoped().Where("`"+engine.ColumnMapper.Obj2Table("Id")+"` > 0").Find(&unscopedRecords1, &Deleted{})
 	if len(unscopedRecords1) != 3 {
 		fmt.Printf("unscopedRecords1 = %v\n", unscopedRecords1)
 		t.Fatalf("Find failed: all records must be selected when engine.Unscoped()")
@@ -119,7 +119,7 @@ func testDeleted(engine *xorm.Engine, t *testing.T) {
 		t.Fatalf("Delete failed")
 	}
 	var unscopedRecords2 []Deleted
-	err = engine.Unscoped().Where("id > 0").Find(&unscopedRecords2, &Deleted{})
+	err = engine.Unscoped().Where("`"+engine.ColumnMapper.Obj2Table("Id")+"` > 0").Find(&unscopedRecords2, &Deleted{})
 	if len(unscopedRecords2) != 2 {
 		t.Fatalf("Find failed: Only 2 records must be selected when engine.Unscoped()")
 	}

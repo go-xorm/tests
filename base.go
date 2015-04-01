@@ -356,7 +356,7 @@ func orderSameMapper(engine *xorm.Engine, t *testing.T) {
 
 func havingSameMapper(engine *xorm.Engine, t *testing.T) {
 	users := make([]Userinfo, 0)
-	err := engine.GroupBy("Username").Having(`"Username"='xlw'`).Find(&users)
+	err := engine.GroupBy("`Username`").Having("`Username`='xlw'").Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -743,6 +743,8 @@ func BaseTestAll(engine *xorm.Engine, t *testing.T) {
 	testDump(engine, t)
 	fmt.Println("-------------- testConversion --------------")
 	testConversion(engine, t)
+	fmt.Println("-------------- testJsonField --------------")
+	testJsonField(engine, t)
 }
 
 func BaseTestAll2(engine *xorm.Engine, t *testing.T) {

@@ -18,7 +18,7 @@ func transaction(engine *xorm.Engine, t *testing.T) {
 	}
 
 	counter()
-	defer counter()
+	//defer counter()
 
 	session := engine.NewSession()
 	defer session.Close()
@@ -75,7 +75,7 @@ func combineTransaction(engine *xorm.Engine, t *testing.T) {
 	}
 
 	counter()
-	defer counter()
+	//defer counter()
 	session := engine.NewSession()
 	defer session.Close()
 
