@@ -22,4 +22,25 @@ func join(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
+
+	join2(engine, t)
+	join3(engine, t)
+}
+
+func join2(engine *xorm.Engine, t *testing.T) {
+	users := make([]Userinfo, 0)
+	err := engine.Join("LEFT", "userdetail", "userinfo.id=userdetail.id").Find(&users, 
+		&Userinfo{Uid: 1})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func join3(engine *xorm.Engine, t *testing.T) {
+	_, err := engine.Join("LEFT", "userdetail", "userinfo.id=userdetail.id").Get(&Userinfo{Uid: 1})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
 }
