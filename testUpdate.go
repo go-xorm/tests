@@ -75,6 +75,78 @@ func update(engine *xorm.Engine, t *testing.T) {
 		return
 	}
 
+	// nullable update
+	{
+		user := &Userinfo{Username: "not null data", Height: 180.5}
+		_, err := engine.Insert(user)
+		if err != nil {
+			t.Error(err)
+			panic(err)
+		}
+		userID := user.Uid
+		
+		has, err := engine.Id(userID).
+			And("username = ?", user.Username).
+			And("height = ?", user.Height).
+			And("departname = ?", "").
+			And("detail_id = ?", 0).
+			And("is_man = ?", 0).
+			And("created IS NOT NULL").
+			Get(&Userinfo{})
+		if err != nil {
+			t.Error(err)
+			panic(err)
+		}
+		if !has {
+			err = errors.New("cannot insert properly")
+			t.Error(err)
+			panic(err)
+		}
+
+		updatedUser := &Userinfo{Username: "null data"}
+		cnt, err = engine.Id(userID).
+			Nullable("height", "departname", "is_man", "created").
+			Update(updatedUser)
+		if err != nil {
+			t.Error(err)
+			panic(err)
+		}
+		if cnt != 1 {
+			err = errors.New("update not returned 1")
+			t.Error(err)
+			panic(err)
+		}
+
+		has, err = engine.Id(userID).
+			And("username = ?", updatedUser.Username).
+			And("height IS NULL").
+			And("departname IS NULL").
+			And("is_man IS NULL").
+			And("created IS NULL").
+			And("detail_id = ?", 0).
+			Get(&Userinfo{})
+		if err != nil {
+			t.Error(err)
+			panic(err)
+		}
+		if !has {
+			err = errors.New("cannot update with null properly")
+			t.Error(err)
+			panic(err)
+		}
+		
+		cnt, err = engine.Id(userID).Delete(&Userinfo{})
+		if err != nil {
+			t.Error(err)
+			panic(err)
+		}
+		if cnt != 1 {
+			err = errors.New("delete not returned 1")
+			t.Error(err)
+			panic(err)
+		}
+	}
+
 	err = engine.StoreEngine("Innodb").Sync2(&Article{})
 	if err != nil {
 		t.Error(err)
