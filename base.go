@@ -816,6 +816,8 @@ func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
 	testCompositeKey2(engine, t)
 	fmt.Println("-------------- testStringPK --------------")
 	testStringPK(engine, t)
+	fmt.Println("-------------- testNullStruct --------------")
+	TestNullStruct(engine, t)
 }
 
 // !nash! the 3rd set of the test is intended for non-cache enabled engine
