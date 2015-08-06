@@ -72,46 +72,6 @@ func NewCacher() core.Cacher {
 	return xorm.NewLRUCacher2(xorm.NewMemoryStore(), time.Hour, 10000)
 }
 
-func testQuery(engine *xorm.Engine, t *testing.T) {
-	sql := "select * from userinfo"
-	results, err := engine.Query(sql)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(results)
-}
-
-func exec(engine *xorm.Engine, t *testing.T) {
-	sql := "update userinfo set username=? where id=?"
-	res, err := engine.Exec(sql, "xiaolun", 1)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(res)
-}
-
-func testQuerySameMapper(engine *xorm.Engine, t *testing.T) {
-	sql := "select * from `Userinfo`"
-	results, err := engine.Query(sql)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(results)
-}
-
-func execSameMapper(engine *xorm.Engine, t *testing.T) {
-	sql := "update `Userinfo` set `Username`=? where (id)=?"
-	res, err := engine.Exec(sql, "xiaolun", 1)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(res)
-}
-
 type Article struct {
 	Id      int32  `xorm:"pk INT autoincr"`
 	Name    string `xorm:"VARCHAR(45)"`
@@ -122,22 +82,7 @@ type Article struct {
 	Status  int8   `xorm:"TINYINT(4)"`
 }
 
-func where(engine *xorm.Engine, t *testing.T) {
-	users := make([]Userinfo, 0)
-	err := engine.Where("(id) > ?", 2).Find(&users)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(users)
 
-	err = engine.Where("(id) > ?", 2).And("(id) < ?", 10).Find(&users)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(users)
-}
 
 func in(engine *xorm.Engine, t *testing.T) {
 	users := make([]Userinfo, 0)
@@ -298,70 +243,6 @@ func limit(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}*/
-}
-
-func order(engine *xorm.Engine, t *testing.T) {
-	users := make([]Userinfo, 0)
-	err := engine.OrderBy("id desc").Find(&users)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(users)
-
-	users2 := make([]Userinfo, 0)
-	err = engine.Asc("id", "username").Desc("height").Find(&users2)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(users2)
-}
-
-func having(engine *xorm.Engine, t *testing.T) {
-	users := make([]Userinfo, 0)
-	err := engine.GroupBy("username").Having("username='xlw'").Find(&users)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(users)
-
-	/*users = make([]Userinfo, 0)
-	err = engine.Cols("id, username").GroupBy("username").Having("username='xlw'").Find(&users)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(users)*/
-}
-
-func orderSameMapper(engine *xorm.Engine, t *testing.T) {
-	users := make([]Userinfo, 0)
-	err := engine.OrderBy("(id) desc").Find(&users)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(users)
-
-	users2 := make([]Userinfo, 0)
-	err = engine.Asc("(id)", "Username").Desc("Height").Find(&users2)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(users2)
-}
-
-func havingSameMapper(engine *xorm.Engine, t *testing.T) {
-	users := make([]Userinfo, 0)
-	err := engine.GroupBy("`Username`").Having("`Username`='xlw'").Find(&users)
-	if err != nil {
-		t.Error(err)
-		panic(err)
-	}
-	fmt.Println(users)
 }
 
 func tableOp(engine *xorm.Engine, t *testing.T) {

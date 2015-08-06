@@ -1,16 +1,23 @@
 package tests
 
 import (
-    "fmt"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/go-xorm/xorm"
 )
 
+type JsonProfile struct {
+	Name string
+	Age  int
+}
+
 type JsonField struct {
-	Id   int64
-	Name map[string]string `xorm:"json"`
+	Id      int64
+	Name    map[string]string `xorm:"json"`
+	Indexes []int             `xorm:"json"`
+	Profile JsonProfile       `xorm:"json"`
 }
 
 func testJsonField(engine *xorm.Engine, t *testing.T) {
@@ -28,10 +35,15 @@ func testJsonField(engine *xorm.Engine, t *testing.T) {
 
 	js := &JsonField{
 		Name: map[string]string{
-			"test": "test",
+			"test":  "test",
 			"test2": "test2",
-			},
-		}
+		},
+		Indexes: []int{1, 3, 5},
+		Profile: JsonProfile{
+			Name: "lll",
+			Age:  12,
+		},
+	}
 	_, err = engine.Insert(js)
 	if err != nil {
 		t.Error(err)
@@ -49,6 +61,12 @@ func testJsonField(engine *xorm.Engine, t *testing.T) {
 
 	if !has {
 		err = errors.New("not exist")
+		t.Error(err)
+		panic(err)
+	}
+
+	if j.Profile.Name != "lll" || j.Profile.Age != 12 {
+		err = errors.New("json unmarshal error")
 		t.Error(err)
 		panic(err)
 	}

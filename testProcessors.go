@@ -2,6 +2,7 @@ package tests
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/go-xorm/xorm"
@@ -16,6 +17,7 @@ type ProcessorsStruct struct {
 	AfterUpdatedFlag  int
 	B4DeleteFlag      int `xorm:"-"`
 	AfterDeletedFlag  int `xorm:"-"`
+	BeforeSetFlag     int `xorm:"-"`
 
 	B4InsertViaExt      int
 	AfterInsertedViaExt int
@@ -23,6 +25,7 @@ type ProcessorsStruct struct {
 	AfterUpdatedViaExt  int
 	B4DeleteViaExt      int `xorm:"-"`
 	AfterDeletedViaExt  int `xorm:"-"`
+	AfterSetFlag        int `xorm:"-"`
 }
 
 func (p *ProcessorsStruct) BeforeInsert() {
@@ -37,6 +40,10 @@ func (p *ProcessorsStruct) BeforeDelete() {
 	p.B4DeleteFlag = 1
 }
 
+func (p *ProcessorsStruct) BeforeSet(col string, cell xorm.Cell) {
+	p.BeforeSetFlag = p.BeforeSetFlag + 1
+}
+
 func (p *ProcessorsStruct) AfterInsert() {
 	p.AfterInsertedFlag = 1
 }
@@ -49,13 +56,11 @@ func (p *ProcessorsStruct) AfterDelete() {
 	p.AfterDeletedFlag = 1
 }
 
-func testProcessors(engine *xorm.Engine, t *testing.T) {
-	// tempEngine, err := NewEngine(engine.DriverName, engine.DataSourceName)
-	// if err != nil {
-	//     t.Error(err)
-	//     panic(err)
-	// }
+func (p *ProcessorsStruct) AfterSet(col string, cell xorm.Cell) {
+	p.AfterSetFlag = p.AfterSetFlag + 1
+}
 
+func testProcessors(engine *xorm.Engine, t *testing.T) {
 	engine.ShowSQL = true
 	err := engine.DropTables(&ProcessorsStruct{})
 	if err != nil {
@@ -123,6 +128,12 @@ func testProcessors(engine *xorm.Engine, t *testing.T) {
 		if p2.AfterInsertedViaExt != 0 {
 			t.Error(errors.New("AfterInsertedViaExt is set"))
 		}
+		if p2.BeforeSetFlag != 9 {
+			t.Error(fmt.Errorf("BeforeSetFlag is %d not 9", p2.BeforeSetFlag))
+		}
+		if p2.AfterSetFlag != 9 {
+			t.Error(fmt.Errorf("AfterSetFlag is %d not 9", p2.BeforeSetFlag))
+		}
 	}
 	// --
 
@@ -181,6 +192,12 @@ func testProcessors(engine *xorm.Engine, t *testing.T) {
 		}
 		if p2.AfterUpdatedViaExt != 0 {
 			t.Error(errors.New("AfterUpdatedViaExt is set: " + string(p.AfterUpdatedViaExt)))
+		}
+		if p2.BeforeSetFlag != 9 {
+			t.Error(fmt.Errorf("BeforeSetFlag is %d not 9", p2.BeforeSetFlag))
+		}
+		if p2.AfterSetFlag != 9 {
+			t.Error(fmt.Errorf("AfterSetFlag is %d not 9", p2.BeforeSetFlag))
 		}
 	}
 	// --
@@ -270,19 +287,18 @@ func testProcessors(engine *xorm.Engine, t *testing.T) {
 			if p2.AfterInsertedViaExt != 0 {
 				t.Error(errors.New("AfterInsertedViaExt is set"))
 			}
+			if p2.BeforeSetFlag != 9 {
+				t.Error(fmt.Errorf("BeforeSetFlag is %d not 9", p2.BeforeSetFlag))
+			}
+			if p2.AfterSetFlag != 9 {
+				t.Error(fmt.Errorf("AfterSetFlag is %d not 9", p2.BeforeSetFlag))
+			}
 		}
 	}
 	// --
 }
 
 func testProcessorsTx(engine *xorm.Engine, t *testing.T) {
-	// tempEngine, err := NewEngine(engine.DriverName, engine.DataSourceName)
-	// if err != nil {
-	//     t.Error(err)
-	//     panic(err)
-	// }
-
-	// tempEngine.ShowSQL = true
 	err := engine.DropTables(&ProcessorsStruct{})
 	if err != nil {
 		t.Error(err)
