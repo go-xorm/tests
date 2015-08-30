@@ -82,8 +82,6 @@ type Article struct {
 	Status  int8   `xorm:"TINYINT(4)"`
 }
 
-
-
 func in(engine *xorm.Engine, t *testing.T) {
 	users := make([]Userinfo, 0)
 	err := engine.In("(id)", 7, 8, 9).Find(&users)
@@ -697,6 +695,8 @@ func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
 	testCompositeKey2(engine, t)
 	fmt.Println("-------------- testStringPK --------------")
 	testStringPK(engine, t)
+	fmt.Println("-------------- testForUpdate --------------")
+	testForUpdate(engine, t)
 }
 
 // !nash! the 3rd set of the test is intended for non-cache enabled engine
