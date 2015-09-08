@@ -46,13 +46,17 @@ type Deleted struct {
 }
 
 func testDeleted(engine *xorm.Engine, t *testing.T) {
-	err := engine.CreateTables(&Deleted{})
+	err := engine.DropTables(&Deleted{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
-	//table := engine.TableInfo(&Deleted{})
+	err = engine.CreateTables(&Deleted{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
 
 	engine.InsertOne(&Deleted{Id: 1, Name: "11111"})
 	engine.InsertOne(&Deleted{Id: 2, Name: "22222"})
