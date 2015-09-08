@@ -83,44 +83,69 @@ type Article struct {
 }
 
 func in(engine *xorm.Engine, t *testing.T) {
+	var usrs []Userinfo
+	err := engine.Limit(3).Find(&usrs)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if len(usrs) != 3 {
+		err = errors.New("there are not 3 records")
+		t.Error(err)
+		panic(err)
+	}
+
+	var ids []int64
+	var idsStr string
+	for _, u := range usrs {
+		ids = append(ids, u.Uid)
+		idsStr = fmt.Sprintf("%d,", u.Uid)
+	}
+	idsStr = idsStr[:len(idsStr)-1]
+
 	users := make([]Userinfo, 0)
-	err := engine.In("(id)", 7, 8, 9).Find(&users)
+	err = engine.In("(id)", ids[0], ids[1], ids[2]).Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 	fmt.Println(users)
 	if len(users) != 3 {
-		err = errors.New("in uses should be 7,8,9 total 3")
+		err = errors.New("in uses should be "+idsStr+" total 3")
 		t.Error(err)
 		panic(err)
 	}
 
 	users = make([]Userinfo, 0)
-	err = engine.In("(id)", []int{7, 8, 9}).Find(&users)
+	err = engine.In("(id)", ids).Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 	fmt.Println(users)
 	if len(users) != 3 {
-		err = errors.New("in uses should be 7,8,9 total 3")
+		err = errors.New("in uses should be "+idsStr+" total 3")
 		t.Error(err)
 		panic(err)
 	}
 
 	for _, user := range users {
-		if user.Uid != 7 && user.Uid != 8 && user.Uid != 9 {
-			err = errors.New("in uses should be 7,8,9 total 3")
+		if user.Uid != ids[0] && user.Uid != ids[1] && user.Uid != ids[2] {
+			err = errors.New("in uses should be "+idsStr+" total 3")
 			t.Error(err)
 			panic(err)
 		}
 	}
 
 	users = make([]Userinfo, 0)
-	ids := []interface{}{7, 8, 9}
+	var idsInterface []interface{}
+	for _, id := range ids {
+		idsInterface = append(idsInterface, id)
+	}
+
 	department := engine.ColumnMapper.Obj2Table("Departname")
-	err = engine.Where("`"+department+"` = ?", "dev").In("(id)", ids...).Find(&users)
+	err = engine.Where("`"+department+"` = ?", "dev").In("(id)", idsInterface...).Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -128,14 +153,14 @@ func in(engine *xorm.Engine, t *testing.T) {
 	fmt.Println(users)
 
 	if len(users) != 3 {
-		err = errors.New("in uses should be 7,8,9 total 3")
+		err = errors.New("in uses should be "+idsStr+" total 3")
 		t.Error(err)
 		panic(err)
 	}
 
 	for _, user := range users {
-		if user.Uid != 7 && user.Uid != 8 && user.Uid != 9 {
-			err = errors.New("in uses should be 7,8,9 total 3")
+		if user.Uid != ids[0] && user.Uid != ids[1] && user.Uid != ids[2] {
+			err = errors.New("in uses should be "+idsStr+" total 3")
 			t.Error(err)
 			panic(err)
 		}
@@ -151,7 +176,7 @@ func in(engine *xorm.Engine, t *testing.T) {
 	}
 	fmt.Println(users)
 
-	cnt, err := engine.In("(id)", 4).Update(&Userinfo{Departname: "dev-"})
+	cnt, err := engine.In("(id)", ids[0]).Update(&Userinfo{Departname: "dev-"})
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -163,7 +188,7 @@ func in(engine *xorm.Engine, t *testing.T) {
 	}
 
 	user := new(Userinfo)
-	has, err := engine.Id(4).Get(user)
+	has, err := engine.Id(ids[0]).Get(user)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -179,7 +204,7 @@ func in(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	cnt, err = engine.In("(id)", 4).Update(&Userinfo{Departname: "dev"})
+	cnt, err = engine.In("(id)", ids[0]).Update(&Userinfo{Departname: "dev"})
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -190,7 +215,7 @@ func in(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	cnt, err = engine.In("(id)", 5).Delete(&Userinfo{})
+	cnt, err = engine.In("(id)", ids[1]).Delete(&Userinfo{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
