@@ -44,6 +44,9 @@ func TestForUpdate(engine *xorm.Engine, t *testing.T) {
 }
 
 func testForUpdate(engine *xorm.Engine, t *testing.T) {
+	if engine.DriverName() == "tidb" {
+		return
+	}
 	err := setupForUpdate(engine)
 	if err != nil {
 		t.Error(err)
