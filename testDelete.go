@@ -87,7 +87,7 @@ func testDeleted(engine *xorm.Engine, t *testing.T) {
 		t.Fatalf("Delete failed. Must not get any records.")
 	}
 	var records2 []Deleted
-	err = engine.Where("`"+engine.ColumnMapper.Obj2Table("Id")+"` > 0").Find(&records2)
+	err = engine.Where("`" + engine.ColumnMapper.Obj2Table("Id") + "` > 0").Find(&records2)
 	if len(records2) != 2 {
 		t.Fatalf("Find() failed.")
 	}
@@ -126,5 +126,12 @@ func testDeleted(engine *xorm.Engine, t *testing.T) {
 	err = engine.Unscoped().Where("`"+engine.ColumnMapper.Obj2Table("Id")+"` > 0").Find(&unscopedRecords2, &Deleted{})
 	if len(unscopedRecords2) != 2 {
 		t.Fatalf("Find failed: Only 2 records must be selected when engine.Unscoped()")
+	}
+
+	var records3 []Deleted
+	err = engine.Where("`"+engine.ColumnMapper.Obj2Table("Id")+"` > 0").And("`"+engine.ColumnMapper.Obj2Table("Id")+"`> 1").
+		Or("`"+engine.ColumnMapper.Obj2Table("Id")+"` = ?", 3).Find(&records3)
+	if len(records3) != 2 {
+		t.Fatalf("Find failed: expected=%d, actual=%d, err=%v", 2, len(records3), err)
 	}
 }
