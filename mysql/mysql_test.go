@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"testing"
 
-	. ".."
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
+	. "github.com/go-xorm/tests"
 	"github.com/go-xorm/xorm"
 )
 

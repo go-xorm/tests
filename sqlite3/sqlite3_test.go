@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	. "../"
 	"github.com/go-xorm/core"
+	. "github.com/go-xorm/tests"
 	"github.com/go-xorm/xorm"
 	_ "github.com/mattn/go-sqlite3"
 )

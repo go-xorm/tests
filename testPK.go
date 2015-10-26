@@ -13,6 +13,11 @@ type IntId struct {
 	Name string
 }
 
+type Int16Id struct {
+	Id   int16 `xorm:"pk autoincr"`
+	Name string
+}
+
 type Int32Id struct {
 	Id   int32 `xorm:"pk autoincr"`
 	Name string
@@ -20,6 +25,11 @@ type Int32Id struct {
 
 type UintId struct {
 	Id   uint `xorm:"pk autoincr"`
+	Name string
+}
+
+type Uint16Id struct {
+	Id   uint16 `xorm:"pk autoincr"`
 	Name string
 }
 
@@ -99,6 +109,79 @@ func testIntId(engine *xorm.Engine, t *testing.T) {
 	}
 
 	cnt, err = engine.Id(bean.Id).Delete(&IntId{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if cnt != 1 {
+		err = errors.New("insert count should be one")
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testInt16Id(engine *xorm.Engine, t *testing.T) {
+	err := engine.DropTables(&Int16Id{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&Int16Id{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	cnt, err := engine.Insert(&Int16Id{Name: "test"})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if cnt != 1 {
+		err = errors.New("insert count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	bean := new(Int16Id)
+	has, err := engine.Get(bean)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !has {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	beans := make([]Int16Id, 0)
+	err = engine.Find(&beans)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	beans2 := make(map[int16]Int16Id, 0)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	cnt, err = engine.Id(bean.Id).Delete(&Int16Id{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -244,6 +327,79 @@ func testUintId(engine *xorm.Engine, t *testing.T) {
 	}
 
 	cnt, err = engine.Id(bean.Id).Delete(&UintId{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if cnt != 1 {
+		err = errors.New("insert count should be one")
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testUint16Id(engine *xorm.Engine, t *testing.T) {
+	err := engine.DropTables(&Uint16Id{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&Uint16Id{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	cnt, err := engine.Insert(&Uint16Id{Name: "test"})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if cnt != 1 {
+		err = errors.New("insert count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	bean := new(Uint16Id)
+	has, err := engine.Get(bean)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !has {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	beans := make([]Uint16Id, 0)
+	err = engine.Find(&beans)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	beans2 := make(map[uint16]Uint16Id, 0)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	cnt, err = engine.Id(bean.Id).Delete(&Uint16Id{})
 	if err != nil {
 		t.Error(err)
 		panic(err)

@@ -112,7 +112,7 @@ func in(engine *xorm.Engine, t *testing.T) {
 	}
 	fmt.Println(users)
 	if len(users) != 3 {
-		err = errors.New("in uses should be "+idsStr+" total 3")
+		err = errors.New("in uses should be " + idsStr + " total 3")
 		t.Error(err)
 		panic(err)
 	}
@@ -125,14 +125,14 @@ func in(engine *xorm.Engine, t *testing.T) {
 	}
 	fmt.Println(users)
 	if len(users) != 3 {
-		err = errors.New("in uses should be "+idsStr+" total 3")
+		err = errors.New("in uses should be " + idsStr + " total 3")
 		t.Error(err)
 		panic(err)
 	}
 
 	for _, user := range users {
 		if user.Uid != ids[0] && user.Uid != ids[1] && user.Uid != ids[2] {
-			err = errors.New("in uses should be "+idsStr+" total 3")
+			err = errors.New("in uses should be " + idsStr + " total 3")
 			t.Error(err)
 			panic(err)
 		}
@@ -153,14 +153,14 @@ func in(engine *xorm.Engine, t *testing.T) {
 	fmt.Println(users)
 
 	if len(users) != 3 {
-		err = errors.New("in uses should be "+idsStr+" total 3")
+		err = errors.New("in uses should be " + idsStr + " total 3")
 		t.Error(err)
 		panic(err)
 	}
 
 	for _, user := range users {
 		if user.Uid != ids[0] && user.Uid != ids[1] && user.Uid != ids[2] {
-			err = errors.New("in uses should be "+idsStr+" total 3")
+			err = errors.New("in uses should be " + idsStr + " total 3")
 			t.Error(err)
 			panic(err)
 		}
@@ -674,10 +674,14 @@ func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
 	testIndexAndUnique(engine, t)
 	fmt.Println("-------------- testIntId --------------")
 	testIntId(engine, t)
+	fmt.Println("-------------- testInt16Id --------------")
+	testInt16Id(engine, t)
 	fmt.Println("-------------- testInt32Id --------------")
 	testInt32Id(engine, t)
 	fmt.Println("-------------- testUintId --------------")
 	testUintId(engine, t)
+	fmt.Println("-------------- testUint16Id --------------")
+	testUint16Id(engine, t)
 	fmt.Println("-------------- testUint32Id --------------")
 	testUint32Id(engine, t)
 	fmt.Println("-------------- testUint64Id --------------")

@@ -30,9 +30,19 @@ type UpdateIncr struct {
 }
 
 func update(engine *xorm.Engine, t *testing.T) {
+	var ori Userinfo
+	has, err := engine.Get(&ori)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !has {
+		t.Error(errors.New("not exist"))
+		panic(errors.New("not exist"))
+	}
 	// update by id
 	user := Userinfo{Username: "xxx", Height: 1.2}
-	cnt, err := engine.Id(4).Update(&user)
+	cnt, err := engine.Id(ori.Uid).Update(&user)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -45,7 +55,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 	}
 
 	condi := Condi{"username": "zzz", "departname": ""}
-	cnt, err = engine.Table(&user).Id(4).Update(&condi)
+	cnt, err = engine.Table(&user).Id(ori.Uid).Update(&condi)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -84,7 +94,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 		userID := user.Uid
-		
+
 		has, err := engine.Id(userID).
 			And("username = ?", user.Username).
 			And("height = ?", user.Height).
@@ -134,7 +144,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 			t.Error(err)
 			panic(err)
 		}
-		
+
 		cnt, err = engine.Id(userID).Delete(&Userinfo{})
 		if err != nil {
 			t.Error(err)
@@ -216,7 +226,7 @@ func update(engine *xorm.Engine, t *testing.T) {
 	}
 
 	col3 := &UpdateAllCols{}
-	has, err := engine.Id(col2.Id).Get(col3)
+	has, err = engine.Id(col2.Id).Get(col3)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -498,9 +508,19 @@ func testUpdateUpdated(engine *xorm.Engine, t *testing.T) {
 }
 
 func updateSameMapper(engine *xorm.Engine, t *testing.T) {
+	var ori Userinfo
+	has, err := engine.Get(&ori)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !has {
+		t.Error(errors.New("not exist"))
+		panic(errors.New("not exist"))
+	}
 	// update by id
 	user := Userinfo{Username: "xxx", Height: 1.2}
-	cnt, err := engine.Id(4).Update(&user)
+	cnt, err := engine.Id(ori.Uid).Update(&user)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -513,7 +533,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 	}
 
 	condi := Condi{"Username": "zzz", "Departname": ""}
-	cnt, err = engine.Table(&user).Id(4).Update(&condi)
+	cnt, err = engine.Table(&user).Id(ori.Uid).Update(&condi)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -612,7 +632,7 @@ func updateSameMapper(engine *xorm.Engine, t *testing.T) {
 	}
 
 	col3 := &UpdateAllCols{}
-	has, err := engine.Id(col2.Id).Get(col3)
+	has, err = engine.Id(col2.Id).Get(col3)
 	if err != nil {
 		t.Error(err)
 		panic(err)

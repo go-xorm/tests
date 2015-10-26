@@ -44,7 +44,7 @@ func TestForUpdate(engine *xorm.Engine, t *testing.T) {
 }
 
 func testForUpdate(engine *xorm.Engine, t *testing.T) {
-	if engine.DriverName() == "tidb" {
+	if engine.DriverName() == "tidb" || engine.DriverName() == "sqlite3" {
 		return
 	}
 	err := setupForUpdate(engine)
