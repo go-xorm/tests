@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/go-xorm/xorm"
 )
@@ -16,6 +17,10 @@ type tempUser2 struct {
 type tempUser3 struct {
 	Temp       *tempUser `xorm:"extends"`
 	Departname string
+}
+
+type tempUser4 struct {
+	tempUser2 `xorm:"extends"`
 }
 
 type UserAndDetail struct {
@@ -52,6 +57,44 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 
 	tu3 := &tempUser2{tempUser{0, "extends update"}, ""}
 	_, err = engine.Id(tu2.Id).Update(tu3)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.DropTables(&tempUser4{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&tempUser4{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	tu8 := &tempUser4{tempUser2{tempUser{0, "extends"}, "dev depart"}}
+	_, err = engine.Insert(tu8)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	tu9 := &tempUser4{}
+	_, err = engine.Get(tu9)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if tu9.tempUser.Username != tu8.tempUser.Username || tu9.tempUser2.Departname != tu8.tempUser2.Departname {
+		err = errors.New(fmt.Sprintln("not equal for", tu8, tu9))
+		t.Error(err)
+		panic(err)
+	}
+
+	tu10 := &tempUser4{tempUser2{tempUser{0, "extends update"}, ""}}
+	_, err = engine.Id(tu9.Id).Update(tu10)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -166,4 +209,97 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(infos2)
+
+	testExtends2(engine, t)
+}
+
+type Message struct {
+	Id         int64     `xorm:"int(11) pk autoincr"`
+	Title      string    `xorm:"varchar(100) notnull"`
+	Content    string    `xorm:"text notnull"`
+	Uid        int64     `xorm:"int(11) notnull"`
+	ToUid      int64     `xorm:"int(11) notnull"`
+	CreateTime time.Time `xorm:"datetime notnull created"`
+}
+
+type MessageUser struct {
+	Id   int64
+	Name string
+}
+
+type MessageExtend struct {
+	Message  `xorm:"extends"`
+	Sender   MessageUser `xorm:"extends"`
+	Receiver MessageUser `xorm:"extends"`
+}
+
+func testExtends2(engine *xorm.Engine, t *testing.T) {
+	err := engine.DropTables(&Message{}, &MessageUser{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&Message{}, &MessageUser{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var sender = MessageUser{Name: "sender"}
+	var receiver = MessageUser{Name: "receiver"}
+	_, err = engine.Insert(&sender, &receiver)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	msg := Message{
+		Title:   "test",
+		Content: "test",
+		Uid:     sender.Id,
+		ToUid:   receiver.Id,
+	}
+	_, err = engine.Insert(&msg)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var mapper = engine.TableMapper.Obj2Table
+	userTableName := mapper("MessageUser")
+	msgTableName := mapper("Message")
+
+	list := make([]MessageExtend, 0)
+	err = engine.Table(msgTableName).Join("LEFT", []string{userTableName, "sender"}, "sender."+mapper("Id")+"="+msgTableName+"."+mapper("Uid")).
+		Join("LEFT", []string{userTableName, "receiver"}, "receiver."+mapper("Id")+"="+msgTableName+"."+mapper("ToUid")).
+		Find(&list)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if len(list) != 1 {
+		err = errors.New(fmt.Sprintln("should have 1 message, got", len(list)))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Message.Id != msg.Id {
+		err = errors.New(fmt.Sprintln("should message equal", list[0].Message, msg))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Sender.Id != sender.Id {
+		err = errors.New(fmt.Sprintln("should sender equal", list[0].Sender, sender))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Receiver.Id != receiver.Id {
+		err = errors.New(fmt.Sprintln("should receiver equal", list[0].Receiver, receiver))
+		t.Error(err)
+		panic(err)
+	}
 }
