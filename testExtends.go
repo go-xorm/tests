@@ -271,8 +271,8 @@ func testExtends2(engine *xorm.Engine, t *testing.T) {
 	msgTableName := mapper("Message")
 
 	list := make([]MessageExtend, 0)
-	err = engine.Table(msgTableName).Join("LEFT", []string{userTableName, "sender"}, "sender."+mapper("Id")+"="+msgTableName+"."+mapper("Uid")).
-		Join("LEFT", []string{userTableName, "receiver"}, "receiver."+mapper("Id")+"="+msgTableName+"."+mapper("ToUid")).
+	err = engine.Table(msgTableName).Join("LEFT", []string{userTableName, "sender"}, "`sender`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("Uid")+"`").
+		Join("LEFT", []string{userTableName, "receiver"}, "`receiver`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("ToUid")+"`").
 		Find(&list)
 	if err != nil {
 		t.Error(err)

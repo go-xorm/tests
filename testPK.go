@@ -290,6 +290,21 @@ func testUintId(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
+	var inserts = []UintId{
+		{Name: "test1"},
+		{Name: "test2"},
+	}
+	cnt, err = engine.Insert(&inserts)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if cnt != 2 {
+		err = errors.New("insert count should be two")
+		t.Error(err)
+		panic(err)
+	}
+
 	bean := new(UintId)
 	has, err := engine.Get(bean)
 	if err != nil {
@@ -308,8 +323,8 @@ func testUintId(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
-	if len(beans) != 1 {
-		err = errors.New("get count should be one")
+	if len(beans) != 3 {
+		err = errors.New("get count should be three")
 		t.Error(err)
 		panic(err)
 	}
@@ -320,8 +335,8 @@ func testUintId(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
-	if len(beans2) != 1 {
-		err = errors.New("get count should be one")
+	if len(beans2) != 3 {
+		err = errors.New("get count should be three")
 		t.Error(err)
 		panic(err)
 	}

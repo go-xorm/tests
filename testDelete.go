@@ -58,9 +58,23 @@ func testDeleted(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	engine.InsertOne(&Deleted{Id: 1, Name: "11111"})
-	engine.InsertOne(&Deleted{Id: 2, Name: "22222"})
-	engine.InsertOne(&Deleted{Id: 3, Name: "33333"})
+	_, err = engine.InsertOne(&Deleted{Id: 1, Name: "11111"})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	_, err = engine.InsertOne(&Deleted{Id: 2, Name: "22222"})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	_, err = engine.InsertOne(&Deleted{Id: 3, Name: "33333"})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
 
 	// Test normal Find()
 	var records1 []Deleted
