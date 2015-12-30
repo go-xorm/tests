@@ -83,8 +83,8 @@ func joinCount2(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	var where = "history.deleted_at > '0000-00-00 00:00:00'"
-	count, err := engine.Table("history").Join("LEFT", "resource", "resource.rid=history.rid").Join("LEFT", "user", "user.uid=history.uid").Where(where).Count(new(History))
+	var where = "`history`.`deleted_at` > '0001-01-01 00:00:00'"
+	count, err := engine.Table("history").Join("LEFT", "resource", "`resource`.`rid`=`history`.`rid`").Join("LEFT", "user", "`user`.`uid`=`history`.`uid`").Where(where).Count(new(History))
 	if err != nil {
 		t.Error(err)
 		panic(err)
