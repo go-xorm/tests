@@ -114,6 +114,50 @@ func testInsertDefault(engine *xorm.Engine, t *testing.T) {
 		t.Error(err, di.Created, di2.Created)
 		panic(err)
 	}
+
+	testInsertDefault2(engine, t)
+}
+
+type DefaultInsert2 struct {
+	Id        int64
+	Name      string
+	Url       string    `xorm:"text"`
+	CheckTime time.Time `xorm:"not null default '2000-01-01 00:00:00' TIMESTAMP"`
+}
+
+func testInsertDefault2(engine *xorm.Engine, t *testing.T) {
+	di := new(DefaultInsert2)
+	err := engine.Sync2(di)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var di2 = DefaultInsert2{Name: "test"}
+	_, err = engine.Omit(engine.ColumnMapper.Obj2Table("Status")).Insert(&di2)
+	if err != nil {
+		t.Error(err)
+	}
+
+	has, err := engine.Desc("(id)").Get(di)
+	if err != nil {
+		t.Error(err)
+	}
+	if !has {
+		err = errors.New("error with no data")
+		t.Error(err)
+		panic(err)
+	}
+
+	/*if di2.Updated.Unix() != di.Updated.Unix() {
+		err = errors.New("updated should equal")
+		t.Error(err, di.Updated, di2.Updated)
+		panic(err)
+	}
+	if di2.Created.Unix() != di.Created.Unix() {
+		err = errors.New("created should equal")
+		t.Error(err, di.Created, di2.Created)
+		panic(err)
+	}*/
 }
 
 type CreatedInsert struct {
