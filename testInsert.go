@@ -133,7 +133,7 @@ func testInsertDefault2(engine *xorm.Engine, t *testing.T) {
 	}
 
 	var di2 = DefaultInsert2{Name: "test"}
-	_, err = engine.Omit(engine.ColumnMapper.Obj2Table("Status")).Insert(&di2)
+	_, err = engine.Omit(engine.ColumnMapper.Obj2Table("CheckTime")).Insert(&di2)
 	if err != nil {
 		t.Error(err)
 	}
@@ -144,6 +144,23 @@ func testInsertDefault2(engine *xorm.Engine, t *testing.T) {
 	}
 	if !has {
 		err = errors.New("error with no data")
+		t.Error(err)
+		panic(err)
+	}
+
+	has, err = engine.NoAutoCondition().Desc("(id)").Get(&di2)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !has {
+		err = errors.New("error with no data")
+		t.Error(err)
+		panic(err)
+	}
+
+	if *di != di2 {
+		err = fmt.Errorf("%v is not equal to %v", di, di2)
 		t.Error(err)
 		panic(err)
 	}
