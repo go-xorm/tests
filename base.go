@@ -376,6 +376,23 @@ func testCols(engine *xorm.Engine, t *testing.T) {
 	fmt.Println("===================", user, affected)
 }
 
+func testRawCols(engine *xorm.Engine, t *testing.T) {
+	// group by category and getting count
+	type userinfo struct {
+		Departname string
+		Size       int64
+	}
+
+	users := []Userinfo{}
+	err := engine.RawCols("departname", "count(*) AS size").Find(&users)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	fmt.Println(users)
+}
+
 func testColsSameMapper(engine *xorm.Engine, t *testing.T) {
 	users := []Userinfo{}
 	err := engine.Cols("id, Username").Find(&users)
@@ -757,6 +774,8 @@ func BaseTestAllSnakeMapper(engine *xorm.Engine, t *testing.T) {
 	combineTransaction(engine, t)
 	fmt.Println("-------------- testCols --------------")
 	testCols(engine, t)
+	fmt.Println("-------------- testRawCols --------------")
+	testRawCols(engine, t)
 	fmt.Println("-------------- testNullStruct --------------")
 	TestNullStruct(engine, t)
 }
