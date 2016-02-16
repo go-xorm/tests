@@ -61,7 +61,7 @@ func (p *ProcessorsStruct) AfterSet(col string, cell xorm.Cell) {
 }
 
 func testProcessors(engine *xorm.Engine, t *testing.T) {
-	engine.ShowSQL = true
+	//engine.ShowSQL = true
 	err := engine.DropTables(&ProcessorsStruct{})
 	if err != nil {
 		t.Error(err)

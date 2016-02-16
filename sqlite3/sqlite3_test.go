@@ -28,10 +28,11 @@ func TestSqlite3(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
+	engine.ShowSQL(ShowTestSql)
+	/*
+		engine.ShowErr = ShowTestSql
+		engine.ShowWarn = ShowTestSql
+		engine.ShowDebug = ShowTestSql*/
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -47,10 +48,11 @@ func TestSqlite3WithCache(t *testing.T) {
 		return
 	}
 	engine.SetDefaultCacher(NewCacher())
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
+	engine.ShowSQL(ShowTestSql)
+	/*
+		engine.ShowErr = ShowTestSql
+		engine.ShowWarn = ShowTestSql
+		engine.ShowDebug = ShowTestSql*/
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -65,10 +67,11 @@ func TestSqlite3SameMapper(t *testing.T) {
 		return
 	}
 	engine.SetMapper(core.SameMapper{})
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
+	engine.ShowSQL(ShowTestSql)
+	/*
+		engine.ShowErr = ShowTestSql
+		engine.ShowWarn = ShowTestSql
+		engine.ShowDebug = ShowTestSql*/
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)
@@ -85,10 +88,11 @@ func TestSqlite3WithCacheSameMapper(t *testing.T) {
 	}
 	engine.SetMapper(core.SameMapper{})
 	engine.SetDefaultCacher(NewCacher())
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
+	engine.ShowSQL(ShowTestSql)
+	/*
+		engine.ShowErr = ShowTestSql
+		engine.ShowWarn = ShowTestSql
+		engine.ShowDebug = ShowTestSql*/
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)
@@ -118,7 +122,7 @@ func BenchmarkSqlite3NoCacheInsert(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	//engine.ShowSQL = true
+	engine.ShowSQL()
 	DoBenchInsert(engine, t)
 }
 
@@ -130,7 +134,7 @@ func BenchmarkSqlite3NoCacheFind(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	//engine.ShowSQL = true
+	engine.ShowSQL()
 	DoBenchFind(engine, t)
 }
 
@@ -142,7 +146,7 @@ func BenchmarkSqlite3NoCacheFindPtr(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	//engine.ShowSQL = true
+	engine.ShowSQL()
 	DoBenchFindPtr(engine, t)
 }
 

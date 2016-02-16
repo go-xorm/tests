@@ -17,6 +17,8 @@ func newOci8Engine() (*xorm.Engine, error) {
 	if err != nil {
 		return nil, err
 	}
+	orm.ShowSQL(ShowTestSql)
+
 	tables, err := orm.DBMetas()
 	if err != nil {
 		return nil, err
@@ -42,10 +44,6 @@ func TestOci8(t *testing.T) {
 		return
 	}
 	defer engine.Close()
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	UserTest1(engine, t)
@@ -60,12 +58,9 @@ func TestOci8WithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(NewCacher())
 	defer engine.Close()
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
+
+	engine.SetDefaultCacher(NewCacher())
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -79,11 +74,8 @@ func TestOci8SameMapper(t *testing.T) {
 		return
 	}
 	defer engine.Close()
+
 	engine.SetMapper(core.SameMapper{})
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)
@@ -97,13 +89,10 @@ func TestOci8WithCacheSameMapper(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine.SetDefaultCacher(NewCacher())
 	defer engine.Close()
+
+	engine.SetDefaultCacher(NewCacher())
 	engine.SetMapper(core.SameMapper{})
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)

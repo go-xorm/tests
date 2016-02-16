@@ -21,20 +21,21 @@ func init() {
 }
 
 func newMssqlEngine() (*xorm.Engine, error) {
-	return xorm.NewEngine("odbc", mssqlConnStr)
+	engine, err := xorm.NewEngine("odbc", mssqlConnStr)
+	if err != nil {
+		return nil, err
+	}
+	engine.ShowSQL(ShowTestSql)
+	return engine, nil
 }
 
 func TestMssql(t *testing.T) {
 	engine, err := newMssqlEngine()
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
+	defer engine.Close()
 
 	BaseTestAll(engine, t)
 	BaseTestAll2(engine, t)
@@ -42,16 +43,13 @@ func TestMssql(t *testing.T) {
 
 func TestMssqlWithCache(t *testing.T) {
 	engine, err := newMssqlEngine()
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	defer engine.Close()
+
 	engine.SetDefaultCacher(NewCacher())
-	engine.ShowSQL = ShowTestSql
-	engine.ShowErr = ShowTestSql
-	engine.ShowWarn = ShowTestSql
-	engine.ShowDebug = ShowTestSql
 
 	BaseTestAll(engine, t)
 	BaseTestAll2(engine, t)
@@ -63,7 +61,7 @@ func newMssqlDriverDB() (*sql.DB, error) {
 
 const (
 	createTableMssql = `IF NOT EXISTS (SELECT [name] FROM sys.tables WHERE [name] = 'big_struct' ) CREATE TABLE
-		"big_struct" ("id" BIGINT PRIMARY KEY IDENTITY NOT NULL, "name" VARCHAR(255) NULL, "title" VARCHAR(255) NULL, 
+		"big_struct" ("id" BIGINT PRIMARY KEY IDENTITY NOT NULL, "name" VARCHAR(255) NULL, "title" VARCHAR(255) NULL,
 		"age" VARCHAR(255) NULL, "alias" VARCHAR(255) NULL, "nick_name" VARCHAR(255) NULL);
 		`
 
@@ -82,44 +80,45 @@ func BenchmarkMssqlDriverFind(t *testing.B) {
 
 func BenchmarkMssqlNoCacheInsert(t *testing.B) {
 	engine, err := newMssqlEngine()
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	//engine.ShowSQL = true
+	defer engine.Close()
+
 	DoBenchInsert(engine, t)
 }
 
 func BenchmarkMssqlNoCacheFind(t *testing.B) {
 	engine, err := newMssqlEngine()
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	//engine.ShowSQL = true
+	defer engine.Close()
+
 	DoBenchFind(engine, t)
 }
 
 func BenchmarkMssqlNoCacheFindPtr(t *testing.B) {
 	engine, err := newMssqlEngine()
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	//engine.ShowSQL = true
+	defer engine.Close()
+
 	DoBenchFindPtr(engine, t)
 }
 
 func BenchmarkMssqlCacheInsert(t *testing.B) {
 	engine, err := newMssqlEngine()
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	defer engine.Close()
+
 	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchInsert(engine, t)
@@ -127,11 +126,12 @@ func BenchmarkMssqlCacheInsert(t *testing.B) {
 
 func BenchmarkMssqlCacheFind(t *testing.B) {
 	engine, err := newMssqlEngine()
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	defer engine.Close()
+
 	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFind(engine, t)
@@ -139,11 +139,12 @@ func BenchmarkMssqlCacheFind(t *testing.B) {
 
 func BenchmarkMssqlCacheFindPtr(t *testing.B) {
 	engine, err := newMssqlEngine()
-	defer engine.Close()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	defer engine.Close()
+
 	engine.SetDefaultCacher(NewCacher())
 
 	DoBenchFindPtr(engine, t)
