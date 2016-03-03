@@ -195,7 +195,7 @@ func testIndexAndUnique(engine *xorm.Engine, t *testing.T) {
 	err = engine.CreateIndexes(&IndexOrUnique{})
 	if err != nil {
 		t.Error(err)
-		//panic(err)
+		panic(err)
 	}
 
 	err = engine.CreateUniques(&IndexOrUnique{})
