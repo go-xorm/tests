@@ -59,6 +59,35 @@ func find2(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
+type Team struct {
+	Id int64
+}
+
+type TeamUser struct {
+	OrgId  int64
+	Uid    int64
+	TeamId int64
+}
+
+func find3(engine *xorm.Engine, t *testing.T) {
+	err := engine.Sync2(new(Team), new(TeamUser))
+	if err != nil {
+		t.Error(err)
+		panic(err.Error())
+	}
+
+	var teams []Team
+	err = engine.Cols("`team`.id").
+		Where("`team_user`.org_id=?", 1).
+		And("`team_user`.uid=?", 2).
+		Join("INNER", "`team_user`", "`team_user`.team_id=`team`.id").
+		Find(&teams)
+	if err != nil {
+		t.Error(err)
+		panic(err.Error())
+	}
+}
+
 func findMap(engine *xorm.Engine, t *testing.T) {
 	users := make(map[int64]Userinfo)
 

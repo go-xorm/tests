@@ -743,6 +743,8 @@ func BaseTestAll3(engine *xorm.Engine, t *testing.T) {
 func BaseTestAllSnakeMapper(engine *xorm.Engine, t *testing.T) {
 	fmt.Println("-------------- query --------------")
 	testQuery(engine, t)
+	fmt.Println("-------------- find3 --------------")
+	find3(engine, t)
 	fmt.Println("-------------- exec --------------")
 	exec(engine, t)
 	fmt.Println("-------------- update --------------")
