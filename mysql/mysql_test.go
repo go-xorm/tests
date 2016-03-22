@@ -14,7 +14,6 @@ import (
 CREATE DATABASE IF NOT EXISTS xorm_test CHARACTER SET
 utf8 COLLATE utf8_general_ci;
 */
-
 func TestMysql(t *testing.T) {
 	err := mysqlDdlImport()
 	if err != nil {
@@ -30,10 +29,6 @@ func TestMysql(t *testing.T) {
 	defer engine.Close()
 
 	engine.ShowSQL(ShowTestSql)
-	/*
-		engine.ShowErr = ShowTestSql
-		engine.ShowWarn = ShowTestSql
-		engine.ShowDebug = ShowTestSql*/
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -56,10 +51,6 @@ func TestMysqlSameMapper(t *testing.T) {
 	defer engine.Close()
 
 	engine.ShowSQL(ShowTestSql)
-	/*
-		engine.ShowErr = ShowTestSql
-		engine.ShowWarn = ShowTestSql
-		engine.ShowDebug = ShowTestSql*/
 	engine.SetMapper(core.SameMapper{})
 
 	BaseTestAll(engine, t)
@@ -83,10 +74,6 @@ func TestMysqlGonicMapper(t *testing.T) {
 	defer engine.Close()
 
 	engine.ShowSQL(ShowTestSql)
-	/*
-		engine.ShowErr = ShowTestSql
-		engine.ShowWarn = ShowTestSql
-		engine.ShowDebug = ShowTestSql*/
 	engine.SetMapper(core.GonicMapper{})
 
 	BaseTestAll(engine, t)
@@ -111,10 +98,6 @@ func TestMysqlWithCache(t *testing.T) {
 
 	engine.SetDefaultCacher(NewCacher())
 	engine.ShowSQL(ShowTestSql)
-	/*
-		engine.ShowErr = ShowTestSql
-		engine.ShowWarn = ShowTestSql
-		engine.ShowDebug = ShowTestSql*/
 
 	BaseTestAll(engine, t)
 	BaseTestAllSnakeMapper(engine, t)
@@ -138,11 +121,6 @@ func TestMysqlWithCacheSameMapper(t *testing.T) {
 	engine.SetMapper(core.SameMapper{})
 	engine.SetDefaultCacher(NewCacher())
 	engine.ShowSQL(ShowTestSql)
-	/*
-		engine.ShowErr = ShowTestSql
-		engine.ShowWarn = ShowTestSql
-		engine.ShowDebug = ShowTestSql
-	*/
 
 	BaseTestAll(engine, t)
 	BaseTestAllSameMapper(engine, t)
@@ -154,16 +132,11 @@ func newMysqlEngine() (*xorm.Engine, error) {
 }
 
 func mysqlDdlImport() error {
-	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test?charset=utf8")
+	engine, err := xorm.NewEngine("mysql", "root:@/?charset=utf8")
 	if err != nil {
 		return err
 	}
 	engine.ShowSQL(ShowTestSql)
-
-	/*
-		engine.ShowErr = ShowTestSql
-		engine.ShowWarn = ShowTestSql
-		engine.ShowDebug = ShowTestSql*/
 
 	sqlResults, err := engine.ImportFile("../testdata/mysql_ddl.sql")
 	if err != nil {
@@ -195,7 +168,7 @@ func BenchmarkMysqlNoCacheInsert(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL()
+	engine.ShowSQL(true)
 	DoBenchInsert(engine, t)
 }
 
@@ -206,7 +179,7 @@ func BenchmarkMysqlNoCacheFind(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL()
+	engine.ShowSQL(true)
 	DoBenchFind(engine, t)
 }
 
@@ -217,7 +190,7 @@ func BenchmarkMysqlNoCacheFindPtr(t *testing.B) {
 		t.Error(err)
 		return
 	}
-	engine.ShowSQL()
+	engine.ShowSQL(true)
 	DoBenchFindPtr(engine, t)
 }
 
@@ -229,6 +202,7 @@ func BenchmarkMysqlCacheInsert(t *testing.B) {
 		return
 	}
 	engine.SetDefaultCacher(NewCacher())
+	engine.ShowSQL(true)
 
 	DoBenchInsert(engine, t)
 }
@@ -241,6 +215,7 @@ func BenchmarkMysqlCacheFind(t *testing.B) {
 		return
 	}
 	engine.SetDefaultCacher(NewCacher())
+	engine.ShowSQL(true)
 
 	DoBenchFind(engine, t)
 }
@@ -253,6 +228,7 @@ func BenchmarkMysqlCacheFindPtr(t *testing.B) {
 		return
 	}
 	engine.SetDefaultCacher(NewCacher())
+	engine.ShowSQL(true)
 
 	DoBenchFindPtr(engine, t)
 }
