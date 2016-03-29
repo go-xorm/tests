@@ -3,6 +3,7 @@ package tests
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/go-xorm/xorm"
@@ -14,10 +15,15 @@ type JsonProfile struct {
 }
 
 type JsonField struct {
-	Id      int64
-	Name    map[string]string `xorm:"json"`
-	Indexes []int             `xorm:"json"`
-	Profile JsonProfile       `xorm:"json"`
+	Id       int64
+	Name     map[string]string `xorm:"json"`
+	Indexes  []int             `xorm:"json"`
+	Profile  JsonProfile       `xorm:"json"`
+	Profile2 *JsonProfile      `xorm:"json"`
+	Name2    map[string]string
+	Indexes2 []int
+	//Profile3 JsonProfile
+	//Profile4 *JsonProfile
 }
 
 func testJsonField(engine *xorm.Engine, t *testing.T) {
@@ -43,7 +49,25 @@ func testJsonField(engine *xorm.Engine, t *testing.T) {
 			Name: "lll",
 			Age:  12,
 		},
+		Profile2: &JsonProfile{
+			Name: "lll",
+			Age:  12,
+		},
+		Name2: map[string]string{
+			"test":  "test",
+			"test2": "test2",
+		},
+		Indexes2: []int{1, 3, 5},
+		/*Profile3: JsonProfile{
+			Name: "lll",
+			Age:  12,
+		},
+		Profile4: &JsonProfile{
+			Name: "lll",
+			Age:  12,
+		},*/
 	}
+
 	_, err = engine.Insert(js)
 	if err != nil {
 		t.Error(err)
@@ -65,8 +89,8 @@ func testJsonField(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	if j.Profile.Name != "lll" || j.Profile.Age != 12 {
-		err = errors.New("json unmarshal error")
+	if !reflect.DeepEqual(js, &j) {
+		err = fmt.Errorf("%v is not equal %v", *js, j)
 		t.Error(err)
 		panic(err)
 	}
@@ -77,11 +101,15 @@ func testJsonField(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
-	if len(jss) == 0 {
+	if len(jss) != 1 {
 		err = errors.New("not exist")
 		t.Error(err)
 		panic(err)
 	}
 
-	fmt.Println("jss:", jss)
+	if !reflect.DeepEqual(js, &jss[0]) {
+		err = fmt.Errorf("%v is not equal %v", *js, j)
+		t.Error(err)
+		panic(err)
+	}
 }

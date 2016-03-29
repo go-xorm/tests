@@ -9,7 +9,7 @@ import (
 )
 
 func joinSameMapper(engine *xorm.Engine, t *testing.T) {
-	users := make([]Userinfo, 0)
+	var users []Userinfo
 	err := engine.Join("LEFT", "`Userdetail`", "`Userinfo`.`(id)`=`Userdetail`.`Id`").Find(&users)
 	if err != nil {
 		t.Error(err)
@@ -18,7 +18,7 @@ func joinSameMapper(engine *xorm.Engine, t *testing.T) {
 }
 
 func join(engine *xorm.Engine, t *testing.T) {
-	users := make([]Userinfo, 0)
+	var users []Userinfo
 	err := engine.Join("LEFT", "userdetail", "userinfo.id=userdetail.id").Find(&users)
 	if err != nil {
 		t.Error(err)
@@ -27,12 +27,61 @@ func join(engine *xorm.Engine, t *testing.T) {
 
 	join2(engine, t)
 	join3(engine, t)
+	joinCond(engine, t)
 	joinCount(engine, t)
 	joinCount2(engine, t)
 }
 
+func joinCond(engine *xorm.Engine, t *testing.T) {
+	var users []Userinfo
+	err := engine.Join("LEFT", "userdetail", "userinfo.id=userdetail.id AND userinfo.id > ?", 0).Find(&users,
+		&Userinfo{Uid: 1})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var user Userinfo
+	_, err = engine.Join("LEFT", "userdetail", "userinfo.id=userdetail.id AND userinfo.id > ?", 0).Id(1).Get(&user)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	total, err := engine.Join("LEFT", "userdetail", "userinfo.id=userdetail.id AND userinfo.id > ?", 0).Where("userinfo.id = ?", 1).Count(&Userinfo{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	fmt.Println(total)
+
+	err = engine.Join("LEFT", "userdetail", "userinfo.id=userdetail.id AND userinfo.id > ?", 0).Iterate(&Userinfo{Uid: 1}, func(i int, bean interface{}) error {
+		fmt.Println(i)
+		return nil
+	})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	rows, err := engine.Join("LEFT", "userdetail", "userinfo.id=userdetail.id AND userinfo.id > ?", 0).Rows(&Userinfo{Uid: 1})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var user2 Userinfo
+	for rows.Next() {
+		err = rows.Scan(&user2)
+		if err != nil {
+			t.Error(err)
+			panic(err)
+		}
+	}
+}
+
 func join2(engine *xorm.Engine, t *testing.T) {
-	users := make([]Userinfo, 0)
+	var users []Userinfo
 	err := engine.Join("LEFT", "userdetail", "userinfo.id=userdetail.id").Find(&users,
 		&Userinfo{Uid: 1})
 	if err != nil {
