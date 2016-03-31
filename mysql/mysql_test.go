@@ -142,7 +142,7 @@ func mysqlDdlImport() error {
 	if err != nil {
 		return err
 	}
-	engine.LogDebug("sql results:", sqlResults)
+	engine.Logger().Debug("sql results:", sqlResults)
 	engine.Close()
 	return nil
 }
