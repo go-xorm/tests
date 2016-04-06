@@ -2,26 +2,17 @@ package tests
 
 import (
 	"database/sql"
-	"runtime"
 	"testing"
 
-	. ".."
+	_ "github.com/denisenkom/go-mssqldb"
+	. "github.com/go-xorm/tests"
 	"github.com/go-xorm/xorm"
-	_ "github.com/lunny/godbc"
 )
 
-var mssqlConnStr string
-
-func init() {
-	if runtime.GOOS == "windows" {
-		mssqlConnStr = "driver={SQL Server};Server=192.168.3.103;Database=xorm_test; uid=sa; pwd=1234;"
-	} else {
-		mssqlConnStr = "driver={freetds};Server=192.168.3.103;Database=xorm_test; uid=sa; pwd=1234;"
-	}
-}
+var mssqlConnStr = "server=localhost;user id=sa;password=;database=xorm_test"
 
 func newMssqlEngine() (*xorm.Engine, error) {
-	engine, err := xorm.NewEngine("odbc", mssqlConnStr)
+	engine, err := xorm.NewEngine("mssql", mssqlConnStr)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +47,7 @@ func TestMssqlWithCache(t *testing.T) {
 }
 
 func newMssqlDriverDB() (*sql.DB, error) {
-	return sql.Open("odbc", mssqlConnStr)
+	return sql.Open("mssql", mssqlConnStr)
 }
 
 const (

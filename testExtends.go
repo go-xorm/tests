@@ -10,7 +10,7 @@ import (
 )
 
 type tempUser2 struct {
-	tempUser   `xorm:"extends"`
+	TempUser tempUser   `xorm:"extends"`
 	Departname string
 }
 
@@ -20,7 +20,7 @@ type tempUser3 struct {
 }
 
 type tempUser4 struct {
-	tempUser2 `xorm:"extends"`
+	TempUser2 tempUser2 `xorm:"extends"`
 }
 
 type UserAndDetail struct {
@@ -56,7 +56,7 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 	}
 
 	tu3 := &tempUser2{tempUser{0, "extends update"}, ""}
-	_, err = engine.Id(tu2.Id).Update(tu3)
+	_, err = engine.Id(tu2.TempUser.Id).Update(tu3)
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -87,14 +87,14 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
-	if tu9.tempUser.Username != tu8.tempUser.Username || tu9.tempUser2.Departname != tu8.tempUser2.Departname {
+	if tu9.TempUser2.TempUser.Username != tu8.TempUser2.TempUser.Username || tu9.TempUser2.Departname != tu8.TempUser2.Departname {
 		err = errors.New(fmt.Sprintln("not equal for", tu8, tu9))
 		t.Error(err)
 		panic(err)
 	}
 
 	tu10 := &tempUser4{tempUser2{tempUser{0, "extends update"}, ""}}
-	_, err = engine.Id(tu9.Id).Update(tu10)
+	_, err = engine.Id(tu9.TempUser2.TempUser.Id).Update(tu10)
 	if err != nil {
 		t.Error(err)
 		panic(err)

@@ -48,6 +48,18 @@ type StringPK struct {
 	Name string
 }
 
+type ID int64
+type MyIntPK struct {
+	ID ID `xorm:"pk autoincr"`
+	Name string
+}
+
+type StrID string
+type MyStringPK struct {
+	ID StrID `xorm:"pk notnull"`
+	Name string
+}
+
 func testIntId(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(&IntId{})
 	if err != nil {
@@ -823,5 +835,177 @@ func testCompositeKey2(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 	} else if cnt != 1 {
 		t.Error(errors.New("can't delete CompositeKey{11, 22}"))
+	}
+}
+
+func testMyIntId(engine *xorm.Engine, t *testing.T) {
+	err := engine.DropTables(&MyIntPK{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&MyIntPK{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	idbean := &MyIntPK{Name: "test"}
+	cnt, err := engine.Insert(idbean)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if cnt != 1 {
+		err = errors.New("insert count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	bean := new(MyIntPK)
+	has, err := engine.Get(bean)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !has {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	if bean.ID != idbean.ID {
+		panic(errors.New("should be equal"))
+	}
+
+	var beans []MyIntPK
+	err = engine.Find(&beans)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	if *bean != beans[0] {
+		panic(errors.New("should be equal"))
+	}
+
+	beans2 := make(map[ID]MyIntPK, 0)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	if *bean != beans2[bean.ID] {
+		panic(errors.New("should be equal"))
+	}
+
+	cnt, err = engine.Id(bean.ID).Delete(&MyIntPK{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if cnt != 1 {
+		err = errors.New("insert count should be one")
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testMyStringId(engine *xorm.Engine, t *testing.T) {
+	err := engine.DropTables(&MyStringPK{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&MyStringPK{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	idbean := &MyStringPK{ID: "1111", Name: "test"}
+	cnt, err := engine.Insert(idbean)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if cnt != 1 {
+		err = errors.New("insert count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	bean := new(MyStringPK)
+	has, err := engine.Get(bean)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if !has {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	if bean.ID != idbean.ID {
+		panic(errors.New("should be equal"))
+	}
+
+	var beans []MyStringPK
+	err = engine.Find(&beans)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	if *bean != beans[0] {
+		panic(errors.New("should be equal"))
+	}
+
+	beans2 := make(map[StrID]MyStringPK, 0)
+	err = engine.Find(&beans2)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if len(beans2) != 1 {
+		err = errors.New("get count should be one")
+		t.Error(err)
+		panic(err)
+	}
+
+	if *bean != beans2[bean.ID] {
+		panic(errors.New("should be equal"))
+	}
+
+	cnt, err = engine.Id(bean.ID).Delete(&MyStringPK{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if cnt != 1 {
+		err = errors.New("insert count should be one")
+		t.Error(err)
+		panic(err)
 	}
 }
