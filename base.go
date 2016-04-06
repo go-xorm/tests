@@ -726,6 +726,8 @@ func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
 	testCompositeKey(engine, t)
 	fmt.Println("-------------- testCompositeKey2 --------------")
 	testCompositeKey2(engine, t)
+	fmt.Println("-------------- testCompositeKey3 --------------")
+	testCompositeKey3(engine, t)
 	fmt.Println("-------------- testStringPK --------------")
 	testStringPK(engine, t)
 	fmt.Println("-------------- testForUpdate --------------")

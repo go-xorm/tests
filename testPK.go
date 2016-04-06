@@ -838,6 +838,71 @@ func testCompositeKey2(engine *xorm.Engine, t *testing.T) {
 	}
 }
 
+type UserPK2 struct {
+	UserId   MyString `xorm:"varchar(19) not null pk"`
+	NickName string `xorm:"varchar(19) not null"`
+	GameId   uint32 `xorm:"integer pk"`
+	Score    int32  `xorm:"integer"`
+}
+
+func testCompositeKey3(engine *xorm.Engine, t *testing.T) {
+	err := engine.DropTables(&UserPK2{})
+
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&UserPK2{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	cnt, err := engine.Insert(&UserPK2{"11", "nick", 22, 5})
+	if err != nil {
+		t.Error(err)
+	} else if cnt != 1 {
+		t.Error(errors.New("failed to insert User{11, 22}"))
+	}
+
+	cnt, err = engine.Insert(&UserPK2{"11", "nick", 22, 6})
+	if err == nil || cnt == 1 {
+		t.Error(errors.New("inserted User{11, 22}"))
+	}
+
+	var user UserPK2
+	has, err := engine.Id(core.PK{"11", 22}).Get(&user)
+	if err != nil {
+		t.Error(err)
+	} else if !has {
+		t.Error(errors.New("can't get User{11, 22}"))
+	}
+
+	// test passing PK ptr, this test seem failed withCache
+	has, err = engine.Id(&core.PK{"11", 22}).Get(&user)
+	if err != nil {
+		t.Error(err)
+	} else if !has {
+		t.Error(errors.New("can't get User{11, 22}"))
+	}
+
+	user = UserPK2{NickName: "test1"}
+	cnt, err = engine.Id(core.PK{"11", 22}).Update(&user)
+	if err != nil {
+		t.Error(err)
+	} else if cnt != 1 {
+		t.Error(errors.New("can't update User{11, 22}"))
+	}
+
+	cnt, err = engine.Id(core.PK{"11", 22}).Delete(&UserPK2{})
+	if err != nil {
+		t.Error(err)
+	} else if cnt != 1 {
+		t.Error(errors.New("can't delete CompositeKey{11, 22}"))
+	}
+}
+
 func testMyIntId(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(&MyIntPK{})
 	if err != nil {
