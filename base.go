@@ -744,6 +744,8 @@ func BaseTestAll3(engine *xorm.Engine, t *testing.T) {
 	testNullValue(engine, t)
 	fmt.Println("-------------- testNoCacheDomain --------------")
 	testNoCacheDomain(engine, t)
+	fmt.Println("-------------- testCache2 --------------")
+	testCache2(engine, t)
 }
 
 func BaseTestAllSnakeMapper(engine *xorm.Engine, t *testing.T) {

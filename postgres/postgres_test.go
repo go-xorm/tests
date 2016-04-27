@@ -12,7 +12,7 @@ import (
 
 //var connStr string = "dbname=xorm_test user=lunny password=1234 sslmode=disable"
 
-var connStr string = "dbname=xorm_test sslmode=disable"
+var connStr string = "postgres://?dbname=xorm_test&sslmode=disable"
 
 func newPostgresEngine() (*xorm.Engine, error) {
 	orm, err := xorm.NewEngine("postgres", connStr)
