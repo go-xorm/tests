@@ -274,6 +274,47 @@ type NullData3 struct {
 	StringPtr *string
 }
 
+type PointersToAliases struct {
+	Id         int64
+	StringPtr  *myString
+	StringPtr2 *myString `xorm:"text"`
+	BoolPtr    *myBool
+	BytePtr    *myByte
+	UintPtr    *myUint
+	Uint8Ptr   *myUint8
+	Uint16Ptr  *myUint16
+	Uint32Ptr  *myUint32
+	Uint64Ptr  *myUint64
+	IntPtr     *myInt
+	Int8Ptr    *myInt8
+	Int16Ptr   *myInt16
+	Int32Ptr   *myInt32
+	Int64Ptr   *myInt64
+	RunePtr    *myRune
+	Float32Ptr *myFloat32
+	Float64Ptr *myFloat64
+	TimePtr    time.Time
+}
+
+type (
+	myString  string
+	myBool    bool
+	myByte    byte
+	myUint    uint
+	myUint8   uint8
+	myUint16  uint16
+	myUint32  uint32
+	myUint64  uint64
+	myInt     int
+	myInt8    int8
+	myInt16   int16
+	myInt32   int32
+	myInt64   int64
+	myRune    rune
+	myFloat32 float32
+	myFloat64 float64
+)
+
 func testPointerData(engine *xorm.Engine, t *testing.T) {
 
 	err := engine.DropTables(&NullData{})
@@ -534,6 +575,228 @@ func testPointerData(engine *xorm.Engine, t *testing.T) {
 	      fmt.Println()
 	  }*/
 	// --
+}
+
+func testPointersToAliases(engine *xorm.Engine, t *testing.T) {
+
+	err := engine.DropTables(&PointersToAliases{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&PointersToAliases{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	data := PointersToAliases{
+		StringPtr:  new(myString),
+		StringPtr2: new(myString),
+		BoolPtr:    new(myBool),
+		BytePtr:    new(myByte),
+		UintPtr:    new(myUint),
+		Uint8Ptr:   new(myUint8),
+		Uint16Ptr:  new(myUint16),
+		Uint32Ptr:  new(myUint32),
+		Uint64Ptr:  new(myUint64),
+		IntPtr:     new(myInt),
+		Int8Ptr:    new(myInt8),
+		Int16Ptr:   new(myInt16),
+		Int32Ptr:   new(myInt32),
+		Int64Ptr:   new(myInt64),
+		RunePtr:    new(myRune),
+		Float32Ptr: new(myFloat32),
+		Float64Ptr: new(myFloat64),
+	}
+
+	*data.StringPtr = "abc"
+	*data.StringPtr2 = "123"
+	*data.BoolPtr = true
+	*data.BytePtr = 1
+	*data.UintPtr = 1
+	*data.Uint8Ptr = 1
+	*data.Uint16Ptr = 1
+	*data.Uint32Ptr = 1
+	*data.Uint64Ptr = 1
+	*data.IntPtr = -1
+	*data.Int8Ptr = -1
+	*data.Int16Ptr = -1
+	*data.Int32Ptr = -1
+	*data.Int64Ptr = -1
+	*data.RunePtr = 1
+	*data.Float32Ptr = -1.2
+	*data.Float64Ptr = -1.1
+
+	cnt, err := engine.Insert(&data)
+	fmt.Println(data.Id)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if cnt != 1 {
+		err = errors.New("insert not returned 1")
+		t.Error(err)
+		panic(err)
+		return
+	}
+	if data.Id <= 0 {
+		err = errors.New("not return id error")
+		t.Error(err)
+		panic(err)
+	}
+
+	// verify get values
+	dataGet := PointersToAliases{}
+	has, err := engine.Id(data.Id).Get(&dataGet)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	} else if !has {
+		t.Error(errors.New("ID not found"))
+	}
+
+	if *dataGet.StringPtr != *data.StringPtr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.StringPtr)))
+	}
+
+	if *dataGet.StringPtr2 != *data.StringPtr2 {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.StringPtr2)))
+	}
+
+	if *dataGet.BoolPtr != *data.BoolPtr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%t]", *dataGet.BoolPtr)))
+	}
+
+	if *dataGet.UintPtr != *data.UintPtr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.UintPtr)))
+	}
+
+	if *dataGet.Uint8Ptr != *data.Uint8Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Uint8Ptr)))
+	}
+
+	if *dataGet.Uint16Ptr != *data.Uint16Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Uint16Ptr)))
+	}
+
+	if *dataGet.Uint32Ptr != *data.Uint32Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Uint32Ptr)))
+	}
+
+	if *dataGet.Uint64Ptr != *data.Uint64Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Uint64Ptr)))
+	}
+
+	if *dataGet.IntPtr != *data.IntPtr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.IntPtr)))
+	}
+
+	if *dataGet.Int8Ptr != *data.Int8Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Int8Ptr)))
+	}
+
+	if *dataGet.Int16Ptr != *data.Int16Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Int16Ptr)))
+	}
+
+	if *dataGet.Int32Ptr != *data.Int32Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Int32Ptr)))
+	}
+
+	if *dataGet.Int64Ptr != *data.Int64Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Int64Ptr)))
+	}
+
+	if *dataGet.RunePtr != *data.RunePtr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.RunePtr)))
+	}
+
+	if *dataGet.Float32Ptr != *data.Float32Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Float32Ptr)))
+	}
+
+	if *dataGet.Float64Ptr != *data.Float64Ptr {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", *dataGet.Float64Ptr)))
+	}
+
+	// using instance type should just work too
+	data2Get := NullData2{}
+
+	tableName := engine.TableMapper.Obj2Table("PointersToAliases")
+
+	has, err = engine.Table(tableName).Id(data.Id).Get(&data2Get)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	} else if !has {
+		t.Error(errors.New("ID not found"))
+	}
+
+	if data2Get.StringPtr != string(*data.StringPtr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.StringPtr)))
+	}
+
+	if data2Get.StringPtr2 != string(*data.StringPtr2) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.StringPtr)))
+	}
+
+	if data2Get.BoolPtr != bool(*data.BoolPtr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%t]", data2Get.BoolPtr)))
+	}
+
+	if data2Get.UintPtr != uint(*data.UintPtr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.UintPtr)))
+	}
+
+	if data2Get.Uint8Ptr != uint8(*data.Uint8Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Uint8Ptr)))
+	}
+
+	if data2Get.Uint16Ptr != uint16(*data.Uint16Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Uint16Ptr)))
+	}
+
+	if data2Get.Uint32Ptr != uint32(*data.Uint32Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Uint32Ptr)))
+	}
+
+	if data2Get.Uint64Ptr != uint64(*data.Uint64Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Uint64Ptr)))
+	}
+
+	if data2Get.IntPtr != int(*data.IntPtr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.IntPtr)))
+	}
+
+	if data2Get.Int8Ptr != int8(*data.Int8Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Int8Ptr)))
+	}
+
+	if data2Get.Int16Ptr != int16(*data.Int16Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Int16Ptr)))
+	}
+
+	if data2Get.Int32Ptr != int32(*data.Int32Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Int32Ptr)))
+	}
+
+	if data2Get.Int64Ptr != int64(*data.Int64Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Int64Ptr)))
+	}
+
+	if data2Get.RunePtr != rune(*data.RunePtr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.RunePtr)))
+	}
+
+	if data2Get.Float32Ptr != float32(*data.Float32Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Float32Ptr)))
+	}
+
+	if data2Get.Float64Ptr != float64(*data.Float64Ptr) {
+		t.Error(errors.New(fmt.Sprintf("inserted value unmatch: [%v]", data2Get.Float64Ptr)))
+	}
 }
 
 func testNullValue(engine *xorm.Engine, t *testing.T) {
