@@ -740,6 +740,8 @@ func BaseTestAll3(engine *xorm.Engine, t *testing.T) {
 	testProcessorsTx(engine, t)
 	fmt.Println("-------------- insert pointer data --------------")
 	testPointerData(engine, t)
+	fmt.Println("-------------- insert pointer to aliased types --------------")
+	testPointersToAliases(engine, t)
 	fmt.Println("-------------- insert null data --------------")
 	testNullValue(engine, t)
 	fmt.Println("-------------- testNoCacheDomain --------------")
