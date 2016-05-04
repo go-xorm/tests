@@ -211,10 +211,17 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 	fmt.Println(infos2)
 
 	testExtends2(engine, t)
+	testExtends3(engine, t)
+	testExtends4(engine, t)
+}
+
+type MessageBase struct {
+	Id         int64     `xorm:"int(11) pk autoincr"`
+	TypeId     int64     `xorm:"int(11) notnull"`
 }
 
 type Message struct {
-	Id         int64     `xorm:"int(11) pk autoincr"`
+	MessageBase `xorm:"extends"`
 	Title      string    `xorm:"varchar(100) notnull"`
 	Content    string    `xorm:"text notnull"`
 	Uid        int64     `xorm:"int(11) notnull"`
@@ -227,20 +234,32 @@ type MessageUser struct {
 	Name string
 }
 
-type MessageExtend struct {
+type MessageType struct {
+	Id   int64
+	Name string
+}
+
+type MessageExtend3 struct {
 	Message  `xorm:"extends"`
 	Sender   MessageUser `xorm:"extends"`
 	Receiver MessageUser `xorm:"extends"`
+	Type     MessageType `xorm:"extends"`
+}
+
+type MessageExtend4 struct {
+	Message     `xorm:"extends"`
+	MessageUser `xorm:"extends"`
+	MessageType `xorm:"extends"`
 }
 
 func testExtends2(engine *xorm.Engine, t *testing.T) {
-	err := engine.DropTables(&Message{}, &MessageUser{})
+	err := engine.DropTables(&Message{}, &MessageUser{}, &MessageType{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
-	err = engine.CreateTables(&Message{}, &MessageUser{})
+	err = engine.CreateTables(&Message{}, &MessageUser{}, &MessageType{})
 	if err != nil {
 		t.Error(err)
 		panic(err)
@@ -248,13 +267,17 @@ func testExtends2(engine *xorm.Engine, t *testing.T) {
 
 	var sender = MessageUser{Name: "sender"}
 	var receiver = MessageUser{Name: "receiver"}
-	_, err = engine.Insert(&sender, &receiver)
+	var msgtype = MessageType{Name: "type"}
+	_, err = engine.Insert(&sender, &receiver, &msgtype)
 	if err != nil {
 		t.Error(err)
 		panic(err)
 	}
 
 	msg := Message{
+		MessageBase: MessageBase{
+			Id: msgtype.Id,
+		},
 		Title:   "test",
 		Content: "test",
 		Uid:     sender.Id,
@@ -268,11 +291,78 @@ func testExtends2(engine *xorm.Engine, t *testing.T) {
 
 	var mapper = engine.TableMapper.Obj2Table
 	userTableName := mapper("MessageUser")
+	typeTableName := mapper("MessageType")
 	msgTableName := mapper("Message")
 
-	list := make([]MessageExtend, 0)
+	list := make([]Message, 0)
 	err = engine.Table(msgTableName).Join("LEFT", []string{userTableName, "sender"}, "`sender`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("Uid")+"`").
 		Join("LEFT", []string{userTableName, "receiver"}, "`receiver`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("ToUid")+"`").
+		Join("LEFT", []string{typeTableName, "type"}, "`type`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("Id")+"`").
+		Find(&list)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if len(list) != 1 {
+		err = errors.New(fmt.Sprintln("should have 1 message, got", len(list)))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Id != msg.Id {
+		err = errors.New(fmt.Sprintln("should message equal", list[0], msg))
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testExtends3(engine *xorm.Engine, t *testing.T) {
+	err := engine.DropTables(&Message{}, &MessageUser{}, &MessageType{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&Message{}, &MessageUser{}, &MessageType{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var sender = MessageUser{Name: "sender"}
+	var receiver = MessageUser{Name: "receiver"}
+	var msgtype = MessageType{Name: "type"}
+	_, err = engine.Insert(&sender, &receiver, &msgtype)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	msg := Message{
+		MessageBase: MessageBase{
+			Id: msgtype.Id,
+		},
+		Title:   "test",
+		Content: "test",
+		Uid:     sender.Id,
+		ToUid:   receiver.Id,
+	}
+	_, err = engine.Insert(&msg)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var mapper = engine.TableMapper.Obj2Table
+	userTableName := mapper("MessageUser")
+	typeTableName := mapper("MessageType")
+	msgTableName := mapper("Message")
+
+	list := make([]MessageExtend3, 0)
+	err = engine.Table(msgTableName).Join("LEFT", []string{userTableName, "sender"}, "`sender`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("Uid")+"`").
+		Join("LEFT", []string{userTableName, "receiver"}, "`receiver`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("ToUid")+"`").
+		Join("LEFT", []string{typeTableName, "type"}, "`type`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("Id")+"`").
 		Find(&list)
 	if err != nil {
 		t.Error(err)
@@ -291,14 +381,94 @@ func testExtends2(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 
-	if list[0].Sender.Id != sender.Id {
+	if list[0].Sender.Id != sender.Id || list[0].Sender.Name != sender.Name {
 		err = errors.New(fmt.Sprintln("should sender equal", list[0].Sender, sender))
 		t.Error(err)
 		panic(err)
 	}
 
-	if list[0].Receiver.Id != receiver.Id {
+	if list[0].Receiver.Id != receiver.Id || list[0].Receiver.Name != receiver.Name {
 		err = errors.New(fmt.Sprintln("should receiver equal", list[0].Receiver, receiver))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Type.Id != msgtype.Id || list[0].Type.Name != msgtype.Name {
+		err = errors.New(fmt.Sprintln("should msgtype equal", list[0].Type, msgtype))
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testExtends4(engine *xorm.Engine, t *testing.T) {
+	err := engine.DropTables(&Message{}, &MessageUser{}, &MessageType{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(&Message{}, &MessageUser{}, &MessageType{})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var sender = MessageUser{Name: "sender"}
+	var msgtype = MessageType{Name: "type"}
+	_, err = engine.Insert(&sender, &msgtype)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	msg := Message{
+		MessageBase: MessageBase{
+			Id: msgtype.Id,
+		},
+		Title:   "test",
+		Content: "test",
+		Uid:     sender.Id,
+	}
+	_, err = engine.Insert(&msg)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var mapper = engine.TableMapper.Obj2Table
+	userTableName := mapper("MessageUser")
+	typeTableName := mapper("MessageType")
+	msgTableName := mapper("Message")
+
+	list := make([]MessageExtend4, 0)
+	err = engine.Table(msgTableName).Join("LEFT", userTableName, "`"+userTableName+"`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("Uid")+"`").
+		Join("LEFT", typeTableName, "`"+typeTableName+"`.`"+mapper("Id")+"`=`"+msgTableName+"`.`"+mapper("Id")+"`").
+		Find(&list)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if len(list) != 1 {
+		err = errors.New(fmt.Sprintln("should have 1 message, got", len(list)))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Message.Id != msg.Id {
+		err = errors.New(fmt.Sprintln("should message equal", list[0].Message, msg))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].MessageUser.Id != sender.Id || list[0].MessageUser.Name != sender.Name {
+		err = errors.New(fmt.Sprintln("should sender equal", list[0].MessageUser, sender))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].MessageType.Id != msgtype.Id || list[0].MessageType.Name != msgtype.Name {
+		err = errors.New(fmt.Sprintln("should msgtype equal", list[0].MessageType, msgtype))
 		t.Error(err)
 		panic(err)
 	}
