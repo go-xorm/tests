@@ -1,1 +1,1 @@
-go test -v -run=TestSqlite3
+go test -v -run=TestSqlite3 "$@"

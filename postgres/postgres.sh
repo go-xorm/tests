@@ -1,1 +1,1 @@
-go test -v -run=TestPostgres
+go test -v -run=TestPostgres "$@"

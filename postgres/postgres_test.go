@@ -12,10 +12,16 @@ import (
 
 //var connStr string = "dbname=xorm_test user=lunny password=1234 sslmode=disable"
 
-var connStr string = "postgres://?dbname=xorm_test&sslmode=disable"
+func connStr() string {
+	conn := "postgres://?dbname=xorm_test&sslmode=disable"
+	if ConnectionPort != "" {
+		conn += "&port=" + ConnectionPort
+	}
+	return conn
+}
 
 func newPostgresEngine() (*xorm.Engine, error) {
-	orm, err := xorm.NewEngine("postgres", connStr)
+	orm, err := xorm.NewEngine("postgres", connStr())
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +42,7 @@ func newPostgresEngine() (*xorm.Engine, error) {
 }
 
 func newPostgresDriverDB() (*sql.DB, error) {
-	return sql.Open("postgres", connStr)
+	return sql.Open("postgres", connStr())
 }
 
 func TestPostgres(t *testing.T) {

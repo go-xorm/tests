@@ -10,6 +10,14 @@ import (
 	"github.com/go-xorm/xorm"
 )
 
+func connStr(db string) string {
+	conn := "root:@"
+	if ConnectionPort != "" {
+		conn += "tcp(127.0.0.1:" + ConnectionPort + ")"
+	}
+	return conn + "/" + db + "?charset=utf8"
+}
+
 /*
 CREATE DATABASE IF NOT EXISTS xorm_test CHARACTER SET
 utf8 COLLATE utf8_general_ci;
@@ -21,7 +29,7 @@ func TestMysql(t *testing.T) {
 		return
 	}
 
-	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test?charset=utf8")
+	engine, err := xorm.NewEngine("mysql", connStr("xorm_test"))
 	if err != nil {
 		t.Error(err)
 		return
@@ -43,7 +51,7 @@ func TestMysqlSameMapper(t *testing.T) {
 		return
 	}
 
-	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test1?charset=utf8")
+	engine, err := xorm.NewEngine("mysql", connStr("xorm_test1"))
 	if err != nil {
 		t.Error(err)
 		return
@@ -66,7 +74,7 @@ func TestMysqlGonicMapper(t *testing.T) {
 		return
 	}
 
-	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test1?charset=utf8")
+	engine, err := xorm.NewEngine("mysql", connStr("xorm_test1"))
 	if err != nil {
 		t.Error(err)
 		return
@@ -89,7 +97,7 @@ func TestMysqlWithCache(t *testing.T) {
 		return
 	}
 
-	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test2?charset=utf8")
+	engine, err := xorm.NewEngine("mysql", connStr("xorm_test2"))
 	if err != nil {
 		t.Error(err)
 		return
@@ -111,7 +119,7 @@ func TestMysqlWithCacheSameMapper(t *testing.T) {
 		return
 	}
 
-	engine, err := xorm.NewEngine("mysql", "root:@/xorm_test3?charset=utf8")
+	engine, err := xorm.NewEngine("mysql", connStr("xorm_test3"))
 	if err != nil {
 		t.Error(err)
 		return
@@ -128,11 +136,11 @@ func TestMysqlWithCacheSameMapper(t *testing.T) {
 }
 
 func newMysqlEngine() (*xorm.Engine, error) {
-	return xorm.NewEngine("mysql", "root:@/xorm_test?charset=utf8")
+	return xorm.NewEngine("mysql", connStr("xorm_test"))
 }
 
 func mysqlDdlImport() error {
-	engine, err := xorm.NewEngine("mysql", "root:@/?charset=utf8")
+	engine, err := xorm.NewEngine("mysql", connStr(""))
 	if err != nil {
 		return err
 	}
@@ -148,7 +156,7 @@ func mysqlDdlImport() error {
 }
 
 func newMysqlDriverDB() (*sql.DB, error) {
-	return sql.Open("mysql", "root:@/xorm_test?charset=utf8")
+	return sql.Open("mysql", connStr("xorm_test"))
 }
 
 func BenchmarkMysqlDriverInsert(t *testing.B) {

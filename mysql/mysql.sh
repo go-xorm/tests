@@ -1,1 +1,1 @@
-go test -v -run=TestMysql
+go test -v -run=TestMysql "$@"
