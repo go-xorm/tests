@@ -13,7 +13,7 @@ import (
 //var connStr string = "dbname=xorm_test user=lunny password=1234 sslmode=disable"
 
 func connStr() string {
-	conn := "postgres://?dbname=xorm_test&sslmode=disable"
+	conn := "postgres://?dbname=xorm_test&sslmode=disable&user=postgres"
 	if ConnectionPort != "" {
 		conn += "&port=" + ConnectionPort
 	}
