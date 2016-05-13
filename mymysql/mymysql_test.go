@@ -9,6 +9,14 @@ import (
 	_ "github.com/ziutek/mymysql/godrv"
 )
 
+func connStr(db string) string {
+	conn := ""
+	if ConnectionPort != "" {
+		conn = "tcp:127.0.0.1:" + ConnectionPort + "*"
+	}
+	return conn + db + "/root/"
+}
+
 /*
 CREATE DATABASE IF NOT EXISTS xorm_test CHARACTER SET
 utf8 COLLATE utf8_general_ci;
@@ -20,7 +28,7 @@ func TestMyMysql(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine, err := xorm.NewEngine("mymysql", "xorm_test/root/")
+	engine, err := xorm.NewEngine("mymysql", connStr("xorm_test"))
 	defer engine.Close()
 	if err != nil {
 		t.Error(err)
@@ -39,7 +47,7 @@ func TestMyMysqlWithCache(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	engine, err := xorm.NewEngine("mymysql", "xorm_test2/root/")
+	engine, err := xorm.NewEngine("mymysql", connStr("xorm_test2"))
 	if err != nil {
 		t.Error(err)
 		return
@@ -54,7 +62,7 @@ func TestMyMysqlWithCache(t *testing.T) {
 }
 
 func newMyMysqlEngine() (*xorm.Engine, error) {
-	engine, err := xorm.NewEngine("mymysql", "xorm_test2/root/")
+	engine, err := xorm.NewEngine("mymysql", connStr("xorm_test2"))
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +71,7 @@ func newMyMysqlEngine() (*xorm.Engine, error) {
 }
 
 func newMyMysqlDriverDB() (*sql.DB, error) {
-	return sql.Open("mymysql", "xorm_test2/root/")
+	return sql.Open("mymysql", connStr("xorm_test2"))
 }
 
 func BenchmarkMyMysqlDriverInsert(t *testing.B) {
@@ -77,7 +85,7 @@ func BenchmarkMyMysqlDriverFind(t *testing.B) {
 }
 
 func mymysqlDdlImport() error {
-	engine, err := xorm.NewEngine("mymysql", "/root/")
+	engine, err := xorm.NewEngine("mymysql", connStr(""))
 	if err != nil {
 		return err
 	}
@@ -89,7 +97,7 @@ func mymysqlDdlImport() error {
 	if err != nil {
 		return err
 	}
-	engine.LogDebug("sql results: %v", sqlResults)
+	engine.Logger().Debug("sql results: %v", sqlResults)
 	return nil
 }
 

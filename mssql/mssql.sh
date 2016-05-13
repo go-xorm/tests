@@ -1,1 +1,1 @@
-go test -v -run=TestMssql
+go test -v -run=TestMssql "$@"

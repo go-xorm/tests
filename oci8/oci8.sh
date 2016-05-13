@@ -1,1 +1,1 @@
-go test -v -run=TestOci8
+go test -v -run=TestOci8 "$@"
