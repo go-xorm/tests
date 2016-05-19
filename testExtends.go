@@ -8,6 +8,18 @@ import (
 	"github.com/go-xorm/xorm"
 )
 
+func testExtends(engine *xorm.Engine, t *testing.T) {
+	testExtends1(engine, t)
+	testExtends2(engine, t)
+	testExtends3(engine, t)
+	testExtends4(engine, t)
+	testExtends5(engine, t)
+	testExtends6(engine, t)
+	testExtends7(engine, t)
+	testExtends8(engine, t)
+	testExtends9(engine, t)
+}
+
 type tempUser2 struct {
 	TempUser tempUser   `xorm:"extends"`
 	Departname string
@@ -27,7 +39,7 @@ type UserAndDetail struct {
 	Userdetail `xorm:"extends"`
 }
 
-func testExtends(engine *xorm.Engine, t *testing.T) {
+func testExtends1(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(&tempUser2{})
 	if err != nil {
 		t.Error(err)
@@ -208,10 +220,6 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(infos2)
-
-	testExtends2(engine, t)
-	testExtends3(engine, t)
-	testExtends4(engine, t)
 }
 
 type MessageBase struct {
@@ -237,6 +245,15 @@ type MessageType struct {
 	Name string
 }
 
+type MessageBaseAndTitle struct {
+	MessageBase `xorm:"extends"`
+	Title string `xorm:"varchar(100) notnull"`
+}
+
+type MessageUserName struct {
+	Name string
+}
+
 type MessageExtend3 struct {
 	Message  `xorm:"extends"`
 	Sender   MessageUser `xorm:"extends"`
@@ -245,11 +262,46 @@ type MessageExtend3 struct {
 }
 
 type MessageExtend4 struct {
+	Message  `xorm:"extends"`
+	Sender   MessageUserName `xorm:"extends"`
+	Receiver MessageUserName `xorm:"extends"`
+}
+
+type MessageExtend5 struct {
 	Message     `xorm:"extends"`
 	MessageUser `xorm:"extends"`
 	MessageType `xorm:"extends"`
 }
 
+type MessageExtend6 struct {
+	Message `xorm:"extends"`
+	MyUser MessageUser `xorm:"extends"`
+	MyType MessageType `xorm:"extends"`
+}
+
+type MessageExtend7 struct {
+	Message     `xorm:"extends"`
+	MyUser1 MessageUser `xorm:"extends"`
+	MyUser2 MessageUser `xorm:"extends"`
+}
+
+type MessageExtend8 struct {
+	Message     MessageBaseAndTitle `xorm:"extends"`
+	MessageUser MessageUser         `xorm:"extends"`
+}
+
+type MessageExtend9 struct {
+	MessageBaseAndTitle `xorm:"extends"`
+	MessageUser         `xorm:"extends"`
+	Content string
+}
+
+type extendsTest struct {
+	message  Message
+	msgtype  MessageType
+	sender   MessageUser
+	receiver MessageUser
+}
 
 func newExtendsTest(engine *xorm.Engine, t *testing.T) extendsTest {
 	var ret extendsTest
@@ -266,9 +318,9 @@ func newExtendsTest(engine *xorm.Engine, t *testing.T) extendsTest {
 		panic(err)
 	}
 
-	ret.msgtype = MessageType{Name: "type"}
-	ret.sender = MessageUser{Name: "sender"}
-	ret.receiver = MessageUser{Name: "receiver"}
+	ret.msgtype = MessageType{Name: "type_name"}
+	ret.sender = MessageUser{Name: "sender_name"}
+	ret.receiver = MessageUser{Name: "receiver_name"}
 
 	_, err = engine.Insert(&ret.msgtype, &ret.sender, &ret.receiver)
 	if err != nil {
@@ -280,8 +332,8 @@ func newExtendsTest(engine *xorm.Engine, t *testing.T) extendsTest {
 		MessageBase: MessageBase{
 			TypeId: ret.msgtype.Id,
 		},
-		Title:   "test",
-		Content: "test",
+		Title:   "test_title",
+		Content: "test_content",
 		Uid:     ret.sender.Id,
 		ToUid:   ret.receiver.Id,
 	}
@@ -296,7 +348,8 @@ func newExtendsTest(engine *xorm.Engine, t *testing.T) extendsTest {
 }
 
 const (
-	NeedSender = (1 << iota)
+	AllowAmbiguous = (1 << iota)
+	NeedSender
 	NeedReceiver
 	NeedType
 	NeedAll = (NeedSender | NeedReceiver | NeedType)
@@ -307,6 +360,10 @@ func (e extendsTest) query(
 	mapper := engine.TableMapper.Obj2Table
 
 	sess := engine.Table(mapper("Message"))
+
+	if (flags & AllowAmbiguous) == 0 {
+		sess.Statement.AllowAmbiguous = false
+	}
 
 	if (flags & NeedSender) != 0 {
 		sess.Join("LEFT", []string{mapper("MessageUser"), "sender"},
@@ -402,6 +459,39 @@ func testExtends4(engine *xorm.Engine, t *testing.T) {
 
 	list := make([]MessageExtend4, 0)
 
+	e.query(engine, t, &list, NeedAll)
+
+	if len(list) != 1 {
+		err := errors.New(fmt.Sprintln("should have 1 message, got", len(list)))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Message != e.message {
+		err := errors.New(fmt.Sprintln("should message equal", list[0].Message, e.message))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Sender.Name != e.sender.Name {
+		err := errors.New(fmt.Sprintln("should sender equal", list[0].Sender, e.sender))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Receiver.Name != e.receiver.Name {
+		err := errors.New(
+			fmt.Sprintln("should receiver equal", list[0].Receiver, e.receiver))
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testExtends5(engine *xorm.Engine, t *testing.T) {
+	e := newExtendsTest(engine, t)
+
+	list := make([]MessageExtend5, 0)
+
 	e.query(engine, t, &list, NeedSender | NeedType)
 
 	if len(list) != 1 {
@@ -426,6 +516,130 @@ func testExtends4(engine *xorm.Engine, t *testing.T) {
 	if list[0].MessageType != e.msgtype {
 		err := errors.New(
 			fmt.Sprintln("should msgtype equal", list[0].MessageType, e.msgtype))
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testExtends6(engine *xorm.Engine, t *testing.T) {
+	e := newExtendsTest(engine, t)
+
+	list := make([]MessageExtend6, 0)
+
+	e.query(engine, t, &list, NeedSender | NeedType)
+
+	if len(list) != 1 {
+		err := errors.New(fmt.Sprintln("should have 1 message, got", len(list)))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Message != e.message {
+		err := errors.New(fmt.Sprintln("should message equal", list[0].Message, e.message))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].MyUser != e.sender {
+		err := errors.New(fmt.Sprintln("should sender equal", list[0].MyUser, e.sender))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].MyType != e.msgtype {
+		err := errors.New(fmt.Sprintln("should msgtype equal", list[0].MyType, e.msgtype))
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testExtends7(engine *xorm.Engine, t *testing.T) {
+	e := newExtendsTest(engine, t)
+
+	list := make([]MessageExtend7, 0)
+
+	e.query(engine, t, &list, NeedAll | AllowAmbiguous)
+
+	if len(list) != 1 {
+		err := errors.New(fmt.Sprintln("should have 1 message, got", len(list)))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Message != e.message {
+		err := errors.New(fmt.Sprintln("should message equal", list[0].Message, e.message))
+		t.Error(err)
+		panic(err)
+	}
+
+	if !((list[0].MyUser1 == e.sender && list[0].MyUser2 == e.receiver) ||
+		(list[0].MyUser2 == e.sender && list[0].MyUser1 == e.receiver)) {
+		err := errors.New(fmt.Sprintln("should sender receiver equal",
+			list[0].MyUser1, list[0].MyUser2, e.sender, e.receiver))
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testExtends8(engine *xorm.Engine, t *testing.T) {
+	e := newExtendsTest(engine, t)
+
+	list := make([]MessageExtend8, 0)
+
+	e.query(engine, t, &list, NeedSender)
+
+	if len(list) != 1 {
+		err := errors.New(fmt.Sprintln("should have 1 message, got", len(list)))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Message.MessageBase != e.message.MessageBase ||
+		list[0].Message.Title != e.message.Title {
+		err := errors.New(fmt.Sprintln("should message equal", list[0].Message, e.message))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].MessageUser != e.sender {
+		err := errors.New(
+			fmt.Sprintln("should sender equal", list[0].MessageUser, e.sender))
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testExtends9(engine *xorm.Engine, t *testing.T) {
+	e := newExtendsTest(engine, t)
+
+	list := make([]MessageExtend9, 0)
+
+	e.query(engine, t, &list, NeedSender | AllowAmbiguous)
+
+	if len(list) != 1 {
+		err := errors.New(fmt.Sprintln("should have 1 message, got", len(list)))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].MessageBaseAndTitle.MessageBase != e.message.MessageBase ||
+		list[0].MessageBaseAndTitle.Title != e.message.Title {
+		err := errors.New(fmt.Sprintln("should message equal",
+			list[0].MessageBaseAndTitle, e.message))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].Content != e.message.Content {
+		err := errors.New(fmt.Sprintln("should message content equal",
+			list[0].Content, e.message.Content))
+		t.Error(err)
+		panic(err)
+	}
+
+	if list[0].MessageUser != e.sender {
+		err := errors.New(
+			fmt.Sprintln("should sender equal", list[0].MessageUser, e.sender))
 		t.Error(err)
 		panic(err)
 	}
