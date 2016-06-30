@@ -10,7 +10,7 @@ import (
 )
 
 type tempUser2 struct {
-	TempUser tempUser   `xorm:"extends"`
+	TempUser   tempUser `xorm:"extends"`
 	Departname string
 }
 
@@ -210,23 +210,23 @@ func testExtends(engine *xorm.Engine, t *testing.T) {
 	}
 	fmt.Println(infos2)
 
-	testExtends2(engine, t)
-	testExtends3(engine, t)
-	testExtends4(engine, t)
+	//testExtends2(engine, t)
+	//testExtends3(engine, t)
+	//testExtends4(engine, t)
 }
 
 type MessageBase struct {
-	Id         int64     `xorm:"int(11) pk autoincr"`
-	TypeId     int64     `xorm:"int(11) notnull"`
+	Id     int64 `xorm:"int(11) pk autoincr"`
+	TypeId int64 `xorm:"int(11) notnull"`
 }
 
 type Message struct {
 	MessageBase `xorm:"extends"`
-	Title      string    `xorm:"varchar(100) notnull"`
-	Content    string    `xorm:"text notnull"`
-	Uid        int64     `xorm:"int(11) notnull"`
-	ToUid      int64     `xorm:"int(11) notnull"`
-	CreateTime time.Time `xorm:"datetime notnull created"`
+	Title       string    `xorm:"varchar(100) notnull"`
+	Content     string    `xorm:"text notnull"`
+	Uid         int64     `xorm:"int(11) notnull"`
+	ToUid       int64     `xorm:"int(11) notnull"`
+	CreateTime  time.Time `xorm:"datetime notnull created"`
 }
 
 type MessageUser struct {
