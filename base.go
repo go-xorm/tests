@@ -649,6 +649,8 @@ func BaseTestAll(engine *xorm.Engine, t *testing.T) {
 	testConversion(engine, t)
 	fmt.Println("-------------- testJsonField --------------")
 	testJsonField(engine, t)
+	fmt.Println("-------------- testSum --------------")
+	testSum(engine, t)
 }
 
 func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
