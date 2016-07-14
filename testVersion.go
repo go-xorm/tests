@@ -4,17 +4,24 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/go-xorm/xorm"
 )
 
 type VersionS struct {
-	Id   int64
-	Name string
-	Ver  int `xorm:"version"`
+	Id      int64
+	Name    string
+	Ver     int       `xorm:"version"`
+	Created time.Time `xorm:"created"`
 }
 
 func testVersion(engine *xorm.Engine, t *testing.T) {
+	testVersion1(engine, t)
+	testVersion2(engine, t)
+}
+
+func testVersion1(engine *xorm.Engine, t *testing.T) {
 	err := engine.DropTables(new(VersionS))
 	if err != nil {
 		t.Error(err)
@@ -80,5 +87,39 @@ func testVersion(engine *xorm.Engine, t *testing.T) {
 		err = errors.New("insert error")
 		t.Error(err)
 		panic(err)
+	}
+}
+
+func testVersion2(engine *xorm.Engine, t *testing.T) {
+	err := engine.DropTables(new(VersionS))
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	err = engine.CreateTables(new(VersionS))
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	var vers = []VersionS{
+		{Name: "sfsfdsfds"},
+		{Name: "xxxxx"},
+	}
+	_, err = engine.Insert(vers)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	fmt.Println(vers)
+
+	for _, v := range vers {
+		if v.Ver != 1 {
+			err := errors.New("version should be 1")
+			t.Error(err)
+			panic(err)
+		}
 	}
 }

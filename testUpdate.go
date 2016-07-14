@@ -30,6 +30,22 @@ type UpdateIncr struct {
 }
 
 func update(engine *xorm.Engine, t *testing.T) {
+	testUpdate1(engine, t)
+	testUpdateUpdated(engine, t)
+	testUpdateMap(engine, t)
+}
+
+func testUpdateMap(engine *xorm.Engine, t *testing.T) {
+	_, err := engine.Table("update_must_cols").Where("id =?", 1).Update(map[string]interface{}{
+		"bool": true,
+	})
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+}
+
+func testUpdate1(engine *xorm.Engine, t *testing.T) {
 	var ori Userinfo
 	has, err := engine.Get(&ori)
 	if err != nil {
@@ -335,8 +351,6 @@ func update(engine *xorm.Engine, t *testing.T) {
 			panic(err)
 		}
 	}
-
-	testUpdateUpdated(engine, t)
 }
 
 type UpdatedUpdate struct {
