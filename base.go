@@ -144,8 +144,8 @@ func in(engine *xorm.Engine, t *testing.T) {
 		idsInterface = append(idsInterface, id)
 	}
 
-	department := engine.ColumnMapper.Obj2Table("Departname")
-	err = engine.Where("`"+department+"` = ?", "dev").In("(id)", idsInterface...).Find(&users)
+	department := "`" + engine.ColumnMapper.Obj2Table("Departname") + "`"
+	err = engine.Where(department+" = ?", "dev").In("(id)", idsInterface...).Find(&users)
 	if err != nil {
 		t.Error(err)
 		panic(err)
