@@ -10,9 +10,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-//var connStr string = "dbname=xorm_test user=lunny password=1234 sslmode=disable"
-
 func connStr() string {
+	//conn := "dbname=xorm_test user=lunny password=1234 sslmode=disable"
 	conn := "postgres://?dbname=xorm_test&sslmode=disable&user=postgres"
 	if ConnectionPort != "" {
 		conn += "&port=" + ConnectionPort
