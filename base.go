@@ -773,6 +773,8 @@ func BaseTestAllSnakeMapper(engine *xorm.Engine, t *testing.T) {
 	testCols(engine, t)
 	fmt.Println("-------------- testNullStruct --------------")
 	TestNullStruct(engine, t)
+	fmt.Println("-------------- testBuilder --------------")
+	testBuilder(engine, t)
 }
 
 func BaseTestAllSameMapper(engine *xorm.Engine, t *testing.T) {
