@@ -139,4 +139,24 @@ func testBuilder1(engine *xorm.Engine, t *testing.T) {
 		t.Error(err)
 		panic(err)
 	}
+
+	// complex condtions
+	var where = NewCond()
+	if true {
+		where = where.And(Eq{"col_name": "col1"})
+		where = where.Or(And(In("col_name", "col1", "col2"), Expr("col_name = ?", "col1")))
+	}
+
+	conds = make([]Condition, 0)
+	err = engine.Where(where).Find(&conds)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	if len(conds) != 1 {
+		err = errors.New("records should exist")
+		t.Error(err)
+		panic(err)
+	}
 }
