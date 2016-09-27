@@ -202,6 +202,11 @@ type CreatedInsert5 struct {
 	Created time.Time `xorm:"created bigint"`
 }
 
+type CreatedInsert6 struct {
+	Id      int64
+	Created time.Time `xorm:"created bigint"`
+}
+
 func testInsertCreated(engine *xorm.Engine, t *testing.T) {
 	di := new(CreatedInsert)
 	err := engine.Sync2(di)
@@ -313,6 +318,30 @@ func testInsertCreated(engine *xorm.Engine, t *testing.T) {
 		t.Fatal("should equal:", ci5, di5)
 	}
 	fmt.Println("ci5:", ci5, "di5:", di5)
+
+	di6 := new(CreatedInsert6)
+	err = engine.Sync2(di6)
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldTime := time.Now().Add(-time.Hour)
+	ci6 := &CreatedInsert6{Created: oldTime}
+	_, err = engine.Insert(ci6)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	has, err = engine.Desc("(id)").Get(di6)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !has {
+		t.Fatal(xorm.ErrNotExist)
+	}
+	if ci6.Created.Unix() != di6.Created.Unix() {
+		t.Fatal("should equal:", ci6, di6)
+	}
+	fmt.Println("ci6:", ci6, "di6:", di6)
 }
 
 type JsonTime time.Time
