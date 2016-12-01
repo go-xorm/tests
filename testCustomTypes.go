@@ -289,7 +289,19 @@ func testCustomType2(engine *xorm.Engine, t *testing.T) {
 		t.Fatal(err)
 	}
 
-	engine.Exec("TRUNCATE TABLE " + engine.TableMapper.Obj2Table("UserCus"))
+	tableName := engine.TableMapper.Obj2Table("UserCus")
+	_, err = engine.Exec("delete from " + engine.Quote(tableName))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if engine.Dialect().DBType() == core.MSSQL {
+		return
+		_, err = engine.Exec("set IDENTITY_INSERT " + tableName + " on")
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 
 	_, err = engine.Insert(&UserCus{1, "xlw", Registed})
 	if err != nil {

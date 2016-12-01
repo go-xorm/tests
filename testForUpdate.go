@@ -5,11 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
 )
 
 type ForUpdate struct {
-	Id   int64
+	Id   int64 `xorm:"pk"`
 	Name string
 }
 
@@ -44,7 +45,7 @@ func TestForUpdate(engine *xorm.Engine, t *testing.T) {
 }
 
 func testForUpdate(engine *xorm.Engine, t *testing.T) {
-	if engine.DriverName() == "tidb" || engine.DriverName() == "sqlite3" {
+	if engine.DriverName() == "tidb" || engine.DriverName() == "sqlite3" || engine.Dialect().DBType() == core.MSSQL {
 		return
 	}
 	err := setupForUpdate(engine)
