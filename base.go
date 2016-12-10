@@ -734,6 +734,8 @@ func BaseTestAll2(engine *xorm.Engine, t *testing.T) {
 	testStringPK(engine, t)
 	fmt.Println("-------------- testForUpdate --------------")
 	testForUpdate(engine, t)
+	fmt.Println("-------------- testID --------------")
+	testID(engine, t)
 }
 
 // !nash! the 3rd set of the test is intended for non-cache enabled engine
