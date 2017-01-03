@@ -8,6 +8,19 @@ import (
 	"github.com/go-xorm/xorm"
 )
 
+func testFind(engine *xorm.Engine, t *testing.T) {
+	fmt.Println("-------------- find --------------")
+	find(engine, t)
+	fmt.Println("-------------- find2 --------------")
+	find2(engine, t)
+	fmt.Println("-------------- findMap --------------")
+	findMap(engine, t)
+	fmt.Println("-------------- findMap2 --------------")
+	findMap2(engine, t)
+	fmt.Println("-------------- findInts --------------")
+	testFindInts(engine, t)
+}
+
 func where(engine *xorm.Engine, t *testing.T) {
 	users := make([]Userinfo, 0)
 	err := engine.Where("(id) > ?", 2).Find(&users)
@@ -204,8 +217,24 @@ func havingSameMapper(engine *xorm.Engine, t *testing.T) {
 	users := make([]Userinfo, 0)
 	err := engine.GroupBy("`Username`").Having("`Username`='xlw'").Find(&users)
 	if err != nil {
-		t.Error(err)
-		panic(err)
+		t.Fatal(err)
 	}
 	fmt.Println(users)
+}
+
+func testFindInts(engine *xorm.Engine, t *testing.T) {
+	userinfo := engine.TableMapper.Obj2Table("Userinfo")
+	var idsInt64 []int64
+	err := engine.Table(userinfo).Cols("id").Desc("id").Find(&idsInt64)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(idsInt64)
+
+	var idsInt32 []int32
+	err = engine.Table(userinfo).Cols("id").Desc("id").Find(&idsInt32)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(idsInt32)
 }
