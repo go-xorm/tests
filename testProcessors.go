@@ -520,6 +520,7 @@ func testProcessorsTx(engine *xorm.Engine, t *testing.T) {
 	}
 
 	session.Close()
+
 	p2 = &ProcessorsStruct{}
 	_, err = engine.Id(insertedId).Get(p2)
 	if err != nil {
@@ -540,6 +541,49 @@ func testProcessorsTx(engine *xorm.Engine, t *testing.T) {
 		}
 	}
 	// --
+
+	// test update processors with tx rollback
+	session = engine.NewSession()
+	err = session.Begin()
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	p = &ProcessorsStruct{Id: insertedId}
+
+	_, err = session.Update(p)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	} else {
+		if p.B4UpdateFlag == 0 {
+			t.Error(errors.New("B4UpdateFlag not set"))
+		}
+		if p.AfterUpdatedFlag != 0 {
+			t.Error(errors.New("AfterUpdatedFlag is set"))
+		}
+	}
+	err = session.Commit()
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	} else {
+		if p.B4UpdateFlag == 0 {
+			t.Error(errors.New("B4UpdateFlag not set"))
+		}
+		if p.AfterUpdatedFlag == 0 {
+			t.Error(errors.New("AfterUpdatedFlag not set"))
+		}
+		if p.AfterDeletedFlag != 0 {
+			t.Error(errors.New("AfterDeletedFlag set"))
+		}
+		if p.AfterInsertedFlag != 0 {
+			t.Error(errors.New("AfterInsertedFlag set"))
+		}
+	}
+
+	session.Close()
 
 	// test update processors with tx commit
 	session = engine.NewSession()
@@ -738,6 +782,49 @@ func testProcessorsTx(engine *xorm.Engine, t *testing.T) {
 		}
 		if p.AfterDeletedViaExt == 0 {
 			t.Error(errors.New("AfterDeletedViaExt not set"))
+		}
+	}
+	session.Close()
+
+	// test delete processors with tx commit
+	session = engine.NewSession()
+	err = session.Begin()
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+
+	p = &ProcessorsStruct{Id: insertedId}
+	fmt.Println("delete")
+	_, err = session.Delete(p)
+
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	} else {
+		if p.B4DeleteFlag == 0 {
+			t.Error(errors.New("B4DeleteFlag not set"))
+		}
+		if p.AfterDeletedFlag != 0 {
+			t.Error(errors.New("AfterDeletedFlag is set"))
+		}
+	}
+	err = session.Commit()
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	} else {
+		if p.B4DeleteFlag == 0 {
+			t.Error(errors.New("B4DeleteFlag not set"))
+		}
+		if p.AfterDeletedFlag == 0 {
+			t.Error(errors.New("AfterDeletedFlag not set"))
+		}
+		if p.AfterInsertedFlag != 0 {
+			t.Error(errors.New("AfterInsertedFlag set"))
+		}
+		if p.AfterUpdatedFlag != 0 {
+			t.Error(errors.New("AfterUpdatedFlag set"))
 		}
 	}
 	session.Close()
