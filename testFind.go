@@ -19,6 +19,8 @@ func testFind(engine *xorm.Engine, t *testing.T) {
 	findMap2(engine, t)
 	fmt.Println("-------------- findInts --------------")
 	testFindInts(engine, t)
+	fmt.Println("-------------- findStrings --------------")
+	testFindStrings(engine, t)
 }
 
 func where(engine *xorm.Engine, t *testing.T) {
@@ -237,4 +239,45 @@ func testFindInts(engine *xorm.Engine, t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println(idsInt32)
+
+	var idsInt []int
+	err = engine.Table(userinfo).Cols("id").Desc("id").Find(&idsInt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(idsInt)
+
+	var idsUint []uint
+	err = engine.Table(userinfo).Cols("id").Desc("id").Find(&idsUint)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(idsUint)
+
+	type MyInt int
+	var idsMyInt []MyInt
+	err = engine.Table(userinfo).Cols("id").Desc("id").Find(&idsMyInt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(idsMyInt)
+}
+
+func testFindStrings(engine *xorm.Engine, t *testing.T) {
+	userinfo := engine.TableMapper.Obj2Table("Userinfo")
+	username := engine.ColumnMapper.Obj2Table("Username")
+	var idsString []string
+	err := engine.Table(userinfo).Cols(username).Desc("id").Find(&idsString)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(idsString)
+
+	/*type MyString string
+	var idsMyString []MyString
+	err = engine.Table(userinfo).Cols(username).Desc("id").Find(&idsMyString)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(idsMyString)*/
 }

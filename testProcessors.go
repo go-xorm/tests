@@ -137,6 +137,76 @@ func testProcessors(engine *xorm.Engine, t *testing.T) {
 	}
 	// --
 
+	// test find processors
+	var p2Find []*ProcessorsStruct
+	err = engine.Find(&p2Find)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	} else {
+		if len(p2Find) != 1 {
+			err = errors.New("Should get 1")
+			t.Error(err)
+		}
+		p21 := p2Find[0]
+		if p21.B4InsertFlag == 0 {
+			t.Error(errors.New("B4InsertFlag not set"))
+		}
+		if p21.AfterInsertedFlag != 0 {
+			t.Error(errors.New("AfterInsertedFlag is set"))
+		}
+		if p21.B4InsertViaExt == 0 {
+			t.Error(errors.New("B4InsertViaExt not set"))
+		}
+		if p21.AfterInsertedViaExt != 0 {
+			t.Error(errors.New("AfterInsertedViaExt is set"))
+		}
+		if p21.BeforeSetFlag != 9 {
+			t.Error(fmt.Errorf("BeforeSetFlag is %d not 9", p21.BeforeSetFlag))
+		}
+		if p21.AfterSetFlag != 9 {
+			t.Error(fmt.Errorf("AfterSetFlag is %d not 9", p21.BeforeSetFlag))
+		}
+	}
+	// --
+
+	// test find map processors
+	var p2FindMap = make(map[int64]*ProcessorsStruct)
+	err = engine.Find(&p2FindMap)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	} else {
+		if len(p2FindMap) != 1 {
+			err = errors.New("Should get 1")
+			t.Error(err)
+		}
+		var p22 *ProcessorsStruct
+		for _, v := range p2FindMap {
+			p22 = v
+		}
+
+		if p22.B4InsertFlag == 0 {
+			t.Error(errors.New("B4InsertFlag not set"))
+		}
+		if p22.AfterInsertedFlag != 0 {
+			t.Error(errors.New("AfterInsertedFlag is set"))
+		}
+		if p22.B4InsertViaExt == 0 {
+			t.Error(errors.New("B4InsertViaExt not set"))
+		}
+		if p22.AfterInsertedViaExt != 0 {
+			t.Error(errors.New("AfterInsertedViaExt is set"))
+		}
+		if p22.BeforeSetFlag != 9 {
+			t.Error(fmt.Errorf("BeforeSetFlag is %d not 9", p22.BeforeSetFlag))
+		}
+		if p22.AfterSetFlag != 9 {
+			t.Error(fmt.Errorf("AfterSetFlag is %d not 9", p22.BeforeSetFlag))
+		}
+	}
+	// --
+
 	// test update processors
 	b4UpdateFunc := func(bean interface{}) {
 		if v, ok := (bean).(*ProcessorsStruct); ok {
