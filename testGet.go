@@ -8,13 +8,19 @@ import (
 	"github.com/go-xorm/xorm"
 )
 
+func get(engine *xorm.Engine, t *testing.T) {
+	getStruct(engine, t)
+	// FIXME: uncomment this after we support get non-struct
+	//getInt(engine, t)
+}
+
 type NoIdUser struct {
 	User   string `xorm:"unique"`
 	Remain int64
 	Total  int64
 }
 
-func get(engine *xorm.Engine, t *testing.T) {
+func getStruct(engine *xorm.Engine, t *testing.T) {
 	user := Userinfo{Uid: 2}
 
 	has, err := engine.Get(&user)
@@ -67,4 +73,18 @@ func get(engine *xorm.Engine, t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(noIdUser)
+}
+
+func getInt(engine *xorm.Engine, t *testing.T) {
+	var id int64
+	has, err := engine.Table("userinfo").Cols("uid").Get(&id)
+	if err != nil {
+		t.Error(err)
+		panic(err)
+	}
+	if has {
+		fmt.Println(id)
+	} else {
+		fmt.Println("no record id is 2")
+	}
 }

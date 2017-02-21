@@ -273,11 +273,82 @@ func testFindStrings(engine *xorm.Engine, t *testing.T) {
 	}
 	fmt.Println(idsString)
 
-	/*type MyString string
+	// FIXME: uncomment this after support custom String
+	//testFindMyString(engine,t)
+	testFindInterface(engine, t)
+	testFindSlicePtrString(engine, t)
+	testFindSliceBytes(engine, t)
+	testFindMapBytes(engine, t)
+	testFindMapPtrString(engine, t)
+}
+
+func testFindMyString(engine *xorm.Engine, t *testing.T) {
+	userinfo := engine.TableMapper.Obj2Table("Userinfo")
+	username := engine.ColumnMapper.Obj2Table("Username")
+	type MyString string
 	var idsMyString []MyString
-	err = engine.Table(userinfo).Cols(username).Desc("id").Find(&idsMyString)
+	err := engine.Table(userinfo).Cols(username).Desc("id").Find(&idsMyString)
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(idsMyString)*/
+	fmt.Println(idsMyString)
+}
+
+func testFindInterface(engine *xorm.Engine, t *testing.T) {
+	userinfo := engine.TableMapper.Obj2Table("Userinfo")
+	username := engine.ColumnMapper.Obj2Table("Username")
+	var idsInterface []interface{}
+	err := engine.Table(userinfo).Cols(username).Desc("id").Find(&idsInterface)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(idsInterface)
+}
+
+func testFindSliceBytes(engine *xorm.Engine, t *testing.T) {
+	userinfo := engine.TableMapper.Obj2Table("Userinfo")
+	var ids [][][]byte
+	err := engine.Table(userinfo).Desc("id").Find(&ids)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, record := range ids {
+		fmt.Println(record)
+	}
+}
+
+func testFindSlicePtrString(engine *xorm.Engine, t *testing.T) {
+	userinfo := engine.TableMapper.Obj2Table("Userinfo")
+	var ids [][]*string
+	err := engine.Table(userinfo).Desc("id").Find(&ids)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, record := range ids {
+		fmt.Println(record)
+	}
+}
+
+func testFindMapBytes(engine *xorm.Engine, t *testing.T) {
+	userinfo := engine.TableMapper.Obj2Table("Userinfo")
+	var ids []map[string][]byte
+	err := engine.Table(userinfo).Desc("id").Find(&ids)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, record := range ids {
+		fmt.Println(record)
+	}
+}
+
+func testFindMapPtrString(engine *xorm.Engine, t *testing.T) {
+	userinfo := engine.TableMapper.Obj2Table("Userinfo")
+	var ids []map[string]*string
+	err := engine.Table(userinfo).Desc("id").Find(&ids)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, record := range ids {
+		fmt.Println(record)
+	}
 }
