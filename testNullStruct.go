@@ -5,10 +5,11 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/go-xorm/xorm"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/go-xorm/xorm"
 )
 
 type NullType struct {
@@ -41,9 +42,10 @@ func (m *CustomStruct) Scan(value interface{}) error {
 		m.Year, _ = strconv.Atoi(seps[0])
 		m.Month, _ = strconv.Atoi(seps[1])
 		m.Day, _ = strconv.Atoi(seps[2])
+		return nil
 	}
 
-	return errors.New("sacn dat not fit []byte")
+	return errors.New("scan data not fit []byte")
 }
 
 func (m CustomStruct) Value() (driver.Value, error) {
